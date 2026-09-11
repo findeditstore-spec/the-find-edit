@@ -146,7 +146,7 @@ const sortedProducts = [...filteredProducts].sort((a, b) => {
 
       {/* Products */}
       <section className="mx-auto max-w-6xl px-6 pb-24 md:px-12">
-        <div className="grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 sm:gap-y-12 lg:grid-cols-3">
 
           {sortedProducts.map((product) => (
             <article key={product.name} className="group">

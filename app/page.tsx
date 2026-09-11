@@ -218,8 +218,42 @@ useEffect(() => {
       </header>
 
       {/* Hero */}
-{/* Hero */}
-<section className="flex min-h-[calc(100vh-100px)] items-center overflow-hidden px-6 md:px-12">
+
+{/* Mobile Hero */}
+<section className="flex min-h-[calc(100vh-100px)] items-center px-6 md:hidden">
+  <div className="mx-auto flex w-full max-w-md flex-col items-center text-center">
+    
+    <h1 className="max-w-sm font-serif text-5xl font-medium leading-[0.95] tracking-tight">
+      {homepageHeadline}
+    </h1>
+
+    <p className="mt-6 max-w-xs text-lg leading-7 text-[#5B6470]">
+      {homepageSubheadline}
+    </p>
+
+    <button
+      type="button"
+      onClick={() => {
+        window.location.href = homepageCtaLink;
+      }}
+      className="mt-8 rounded-full bg-[#176B6B] px-7 py-4 text-sm font-medium text-white transition hover:bg-[#125858]"
+    >
+      {homepageCtaText}
+    </button>
+
+    <div className="mt-10 flex justify-center">
+      <img
+        src="/find-edit-bag.png"
+        alt="The Find Edit shopping bag"
+        className="w-[210px]"
+      />
+    </div>
+
+  </div>
+</section>
+
+{/* Tablet + Desktop Hero */}
+<section className="hidden min-h-[calc(100vh-100px)] items-center overflow-hidden px-6 md:flex md:px-12">
   <div className="mx-auto grid w-full max-w-6xl grid-cols-2 items-center gap-4 sm:gap-8 lg:gap-16">
     
     <div className="text-left">
@@ -238,8 +272,8 @@ useEffect(() => {
       <button
         type="button"
         onClick={() => {
-  window.location.href = homepageCtaLink;
-}}
+          window.location.href = homepageCtaLink;
+        }}
         className="mt-10 rounded-full bg-[#176B6B] px-8 py-4 text-sm font-medium text-white transition hover:bg-[#125858]"
       >
         {homepageCtaText}
@@ -257,9 +291,9 @@ useEffect(() => {
   </div>
 
   <div className="absolute bottom-8 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 text-sm text-[#7A827D]">
-  <span>Scroll to discover</span>
-  <span className="text-lg">↓</span>
-</div>
+    <span>Scroll to discover</span>
+    <span className="text-lg">↓</span>
+  </div>
 </section>
 
 {/* Latest Finds */}
