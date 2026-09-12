@@ -9,13 +9,16 @@ export default async function FashionPage() {
     <CategoryPage
       title="Fashion Finds"
       description="Affordable pieces selected for your next look."
-      filters={[
-        "All",
-        "Clothing",
-        "Shoes",
-        "Bags",
-        "Accessories",
-      ]}
+     filters={[
+  "All",
+  ...Array.from(
+    new Set(
+      fashionProducts
+        .map((product) => product.subcategory)
+        .filter(Boolean)
+    )
+  ),
+]}
       products={fashionProducts}
     />
   );

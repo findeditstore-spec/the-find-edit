@@ -10,13 +10,15 @@ export default async function BeautyPage() {
       title="Beauty Finds"
       description="Simple beauty tools and accessories worth discovering."
       filters={[
-        "All",
-        "Makeup Tools",
-        "Hair",
-        "Nails",
-        "Skincare Tools",
-        "Organisers",
-      ]}
+  "All",
+  ...Array.from(
+    new Set(
+      beautyProducts
+        .map((product) => product.subcategory)
+        .filter(Boolean)
+    )
+  ),
+]}
       products={beautyProducts}
     />
   );

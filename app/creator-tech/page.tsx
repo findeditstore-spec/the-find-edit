@@ -10,13 +10,15 @@ export default async function CreatorTechPage() {
       title="Creator Tech"
       description="Affordable tools to make your content look and sound better."
       filters={[
-        "All",
-        "Ring Lights",
-        "Tripods",
-        "Phone Stands",
-        "Microphones",
-        "Desk Setup",
-      ]}
+  "All",
+  ...Array.from(
+    new Set(
+      creatorProducts
+        .map((product) => product.subcategory)
+        .filter(Boolean)
+    )
+  ),
+]}
       products={creatorProducts}
     />
   );
