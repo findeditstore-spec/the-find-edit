@@ -1,5 +1,6 @@
 import CategoryPage from "../components/CategoryPage";
 import { getProductsByCategory } from "../lib/products";
+export const dynamic = "force-dynamic";
 
 export default async function FashionPage() {
   const fashionProducts = await getProductsByCategory("Fashion");
