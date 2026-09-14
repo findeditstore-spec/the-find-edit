@@ -194,10 +194,10 @@ const sortedProducts = [...filteredProducts].sort((a, b) => {
           </p>
 
           <div className="flex gap-5 text-sm text-[#5B6470]">
-            <a href="#">About</a>
-            <a href="#">How it works</a>
-            <a href="#">Privacy</a>
-            <a href="#">Contact</a>
+            <a href="/about">About</a>
+            <a href="/how-it-works">How it works</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/contact">Contact</a>
           </div>
         </div>
       </footer>

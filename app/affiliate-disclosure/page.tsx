@@ -122,8 +122,8 @@ export default function AffiliateDisclosurePage() {
             <a href="/about">About</a>
             <a href="/how-it-works">How it works</a>
             <a href="/affiliate-disclosure">Affiliate disclosure</a>
-            <a href="#">Privacy</a>
-            <a href="#">Contact</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/contact">Contact</a>
           </div>
         </div>
       </footer>

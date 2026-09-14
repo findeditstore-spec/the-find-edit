@@ -273,7 +273,7 @@ setStoreClicks(storeCounts);
             </h3>
 
             <a
-              href="#"
+              href="/admin/products"
               className="text-sm text-[#176B6B] hover:underline"
             >
               View all

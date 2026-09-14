@@ -126,7 +126,7 @@ export default function PrivacyPage() {
             <a href="/how-it-works">How it works</a>
             <a href="/affiliate-disclosure">Affiliate disclosure</a>
             <a href="/privacy">Privacy</a>
-            <a href="#">Contact</a>
+            <a href="/contact">Contact</a>
           </div>
         </div>
       </footer>

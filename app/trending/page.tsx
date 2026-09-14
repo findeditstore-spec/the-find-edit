@@ -52,8 +52,8 @@ export default function TrendingPage() {
           <div className="flex flex-wrap gap-5 text-sm text-[#5B6470]">
             <a href="/about">About</a>
             <a href="/how-it-works">How it works</a>
-            <a href="#">Privacy</a>
-            <a href="#">Contact</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/contact">Contact</a>
           </div>
         </div>
       </footer>
