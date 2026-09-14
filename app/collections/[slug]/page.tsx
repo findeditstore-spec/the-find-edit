@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
+import ProductImageGallery from "../../components/ProductImageGallery";
 
 export default function CollectionPage() {
   const [collection, setCollection] = useState<{
@@ -18,6 +19,7 @@ const [collectionProducts, setCollectionProducts] = useState<
     name: string;
     category: string;
     image: string | null;
+    images: string[];
     price: string;
     slug: string;
   }[]
@@ -67,7 +69,7 @@ if (ids.length > 0) {
   const { data: products, error: productError } =
     await supabase
       .from("products")
-      .select("id, name, category, image, price, slug")
+      .select("id, name, category, image, images, price, slug")
       .in("id", ids)
       .eq("status", "active");
 
@@ -122,13 +124,10 @@ setLoading(false);
           key={product.id}
           className="overflow-hidden rounded-2xl border border-[#EAE6DF] bg-white"
         >
-          {product.image && (
-            <img
-              src={product.image}
-              alt={product.name}
-              className="h-64 w-full object-cover"
-            />
-          )}
+          <ProductImageGallery
+  images={product.images?.length ? product.images : [product.image ?? ""]}
+  alt={product.name}
+/>
 
           <div className="p-5">
             <p className="text-xs uppercase tracking-wide text-[#6B7280]">

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import NavigationMenu from "./NavigationMenu";
+import ProductImageGallery from "./ProductImageGallery";
 
 type Product = {
   id: string;
@@ -9,6 +10,7 @@ type Product = {
   name: string;
   description: string;
   image: string;
+  images: string[];
   price: string;
   store: string;
   category: string;
@@ -151,13 +153,10 @@ const sortedProducts = [...filteredProducts].sort((a, b) => {
           {sortedProducts.map((product) => (
             <article key={product.name} className="group">
 
-              <div className="aspect-square overflow-hidden rounded-[2rem] bg-[#F2EFE9]">
-  <img
-    src={product.image}
-    alt={product.name}
-    className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.03]"
-  />
-</div>
+              <ProductImageGallery
+  images={product.images?.length ? product.images : [product.image]}
+  alt={product.name}
+/>
 
               <div className="pt-5">
   <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#7A827D]">

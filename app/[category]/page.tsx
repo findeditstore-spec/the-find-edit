@@ -10,6 +10,7 @@ type Product = {
   name: string;
   description: string;
   image: string;
+  images: string[];
   price: string;
   store: string;
   category: string;
@@ -68,8 +69,8 @@ export default function DynamicCategoryPage({
         await supabase
           .from("products")
           .select(
-            "id, slug, name, description, image, price, store, category, subcategory"
-          )
+  "id, slug, name, description, image, images, price, store, category, subcategory"
+)
           .eq("category", categoryData.name)
           .eq("status", "active")
           .order("created_at", { ascending: false });
@@ -87,6 +88,7 @@ export default function DynamicCategoryPage({
         (productData ?? []).map((product) => ({
           ...product,
           image: product.image ?? "",
+          images: product.images ?? [],
           description: product.description ?? "",
           price: product.price ?? "",
           store: product.store ?? "",

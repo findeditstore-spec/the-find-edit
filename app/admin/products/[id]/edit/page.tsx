@@ -22,10 +22,22 @@ export default function EditProductPage({
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  const [imageFile, setImageFile] = useState<File | null>(null);
-const [imagePreview, setImagePreview] = useState("");
-const [uploadingImage, setUploadingImage] = useState(false);
-const [imageUrl, setImageUrl] = useState("");
+ const [imageFiles, setImageFiles] = useState<(File | null)[]>([
+  null,
+  null,
+  null,
+]);
+const [imagePreviews, setImagePreviews] = useState<string[]>([
+  "",
+  "",
+  "",
+]);
+const [uploadingImages, setUploadingImages] = useState(false);
+const [imageUrls, setImageUrls] = useState<string[]>([
+  "",
+  "",
+  "",
+]);
 const [customStore, setCustomStore] = useState("");
 const [selectedStore, setSelectedStore] = useState("");
 const [categories, setCategories] = useState<
@@ -64,7 +76,20 @@ if (categoryError) {
         return;
       }
 
-      setProduct(data);     
+      setProduct(data);  
+      
+      const existingImages =
+  data?.images?.length
+    ? data.images.slice(0, 3)
+    : data?.image
+      ? [data.image]
+      : [];
+
+setImageUrls([
+  existingImages[0] ?? "",
+  existingImages[1] ?? "",
+  existingImages[2] ?? "",
+]);
 
 const standardStores = [
   "SHEIN",
@@ -90,50 +115,79 @@ setLoading(false);
     loadProduct();
     }, [params]);
 
-  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+ function handleImageChange(
+  event: ChangeEvent<HTMLInputElement>,
+  index: number
+) {
   const file = event.target.files?.[0];
 
   if (!file) {
     return;
   }
 
-  setImageFile(file);
-  setImagePreview(URL.createObjectURL(file));
+  const preview = URL.createObjectURL(file);
+
+  setImageFiles((current) => {
+    const updated = [...current];
+    updated[index] = file;
+    return updated;
+  });
+
+  setImagePreviews((current) => {
+    const updated = [...current];
+    updated[index] = preview;
+    return updated;
+  });
 }
 
-async function uploadImage() {
-  if (!imageFile) {
-    setMessage("Please choose an image first.");
+async function uploadImages() {
+  const filesToUpload = imageFiles.filter(
+    (file): file is File => file !== null
+  );
+
+  if (filesToUpload.length === 0) {
+    setMessage("Please choose at least one image first.");
     return;
   }
 
-  setUploadingImage(true);
+  setUploadingImages(true);
   setMessage("");
 
-  const fileExtension = imageFile.name.split(".").pop();
-  const fileName = `${crypto.randomUUID()}.${fileExtension}`;
-  const filePath = `products/${fileName}`;
+  const uploadedUrls = [...imageUrls];
 
-  const { error } = await supabase.storage
-    .from("product-images")
-    .upload(filePath, imageFile);
+  for (let index = 0; index < imageFiles.length; index++) {
+    const file = imageFiles[index];
 
-  if (error) {
-    setMessage(`Image upload failed: ${error.message}`);
-    setUploadingImage(false);
-    return;
+    if (!file) {
+      continue;
+    }
+
+    const fileExtension = file.name.split(".").pop();
+    const fileName = `${crypto.randomUUID()}.${fileExtension}`;
+    const filePath = `products/${fileName}`;
+
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, file);
+
+    if (error) {
+      setMessage(`Image upload failed: ${error.message}`);
+      setUploadingImages(false);
+      return;
+    }
+
+    const {
+      data: { publicUrl },
+    } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
+
+    uploadedUrls[index] = publicUrl;
   }
 
-  const {
-    data: { publicUrl },
-  } = supabase.storage
-    .from("product-images")
-    .getPublicUrl(filePath);
-
-  setImageUrl(publicUrl);
-
-  setMessage("New image uploaded successfully.");
-  setUploadingImage(false);
+  setImageUrls(uploadedUrls);
+  setMessage("Images uploaded successfully.");
+  setUploadingImages(false);
 }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -152,7 +206,9 @@ async function uploadImage() {
   const description =
     formData.get("description")?.toString().trim() || "";
   const image =
-  imageUrl || formData.get("image")?.toString().trim() || "";
+  imageUrls[0] || formData.get("image")?.toString().trim() || "";
+
+const images = imageUrls.filter(Boolean).slice(0, 3);
   const category = formData.get("category")?.toString() || "";
   const subcategory =
     formData.get("subcategory")?.toString().trim() || "";
@@ -183,7 +239,8 @@ const store =
       name,
       description,
       image,
-      category,
+images,
+category,
       subcategory,
       price,
       store,
@@ -208,6 +265,7 @@ const store =
     name,
     description,
     image,
+    images,
     category,
     subcategory,
     price,
@@ -325,7 +383,6 @@ const store =
             />
           </div>
 
-          <div>
   <label
     htmlFor="image"
     className="block text-sm font-medium"
@@ -342,50 +399,70 @@ const store =
   />
 
   <div className="mt-4 rounded-xl border border-dashed border-[#D8D2C8] bg-[#FFFDF9] p-5">
-    <label
-      htmlFor="new-image"
-      className="block text-sm font-medium"
-    >
-      Replace image
-    </label>
+  <p className="text-sm font-medium">Product images</p>
 
-    <input
-      id="new-image"
-      type="file"
-      accept="image/png,image/jpeg,image/webp"
-      onChange={handleImageChange}
-      className="mt-3 block w-full text-sm text-[#5B6470]"
-    />
+  <p className="mt-1 text-xs text-[#6B7280]">
+    Add up to 3 images. Image 1 is the main product image.
+  </p>
 
-    <p className="mt-2 text-xs text-[#6B7280]">
-      Choose a new PNG, JPG or WebP image.
-    </p>
-  </div>
+  <input
+    id="new-image-1"
+    type="file"
+    accept="image/png,image/jpeg,image/webp"
+    onChange={(event) => handleImageChange(event, 0)}
+    className="mt-4 block w-full text-sm text-[#5B6470]"
+  />
 
-  {imagePreview && (
+  <input
+    id="new-image-2"
+    type="file"
+    accept="image/png,image/jpeg,image/webp"
+    onChange={(event) => handleImageChange(event, 1)}
+    className="mt-4 block w-full text-sm text-[#5B6470]"
+  />
+
+  <input
+    id="new-image-3"
+    type="file"
+    accept="image/png,image/jpeg,image/webp"
+    onChange={(event) => handleImageChange(event, 2)}
+    className="mt-4 block w-full text-sm text-[#5B6470]"
+  />
+
+  {imagePreviews.some(Boolean) && (
     <div className="mt-5">
       <p className="mb-3 text-sm font-medium">
         New image preview
       </p>
 
-      <div className="overflow-hidden rounded-2xl border border-[#EAE6DF] bg-[#F4F0E9]">
-        <img
-          src={imagePreview}
-          alt="New product preview"
-          className="h-72 w-full object-contain"
-        />
+      <div className="grid gap-4 sm:grid-cols-3">
+        {imagePreviews.map(
+          (preview, index) =>
+            preview && (
+              <div
+                key={index}
+                className="overflow-hidden rounded-2xl border border-[#EAE6DF] bg-[#F4F0E9]"
+              >
+                <img
+                  src={preview}
+                  alt={`New product preview ${index + 1}`}
+                  className="h-48 w-full object-contain"
+                />
+              </div>
+            )
+        )}
       </div>
     </div>
   )}
 
-  {imageFile && (
+  {imageFiles.some(Boolean) && (
     <button
       type="button"
-      onClick={uploadImage}
-      disabled={uploadingImage}
+      onClick={uploadImages}
+      disabled={uploadingImages}
       className="mt-4 rounded-full border border-[#176B6B] px-6 py-3 text-sm font-medium text-[#176B6B] transition hover:bg-[#F4F0E9] disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {uploadingImage ? "Uploading..." : "Upload new image"}
+      {uploadingImages ? "Uploading..." : "Upload images"}
     </button>
   )}
 </div>

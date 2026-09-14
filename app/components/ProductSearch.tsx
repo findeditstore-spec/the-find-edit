@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
+import ProductImageGallery from "./ProductImageGallery";
 
 type Product = {
   id: string;
@@ -10,6 +11,7 @@ type Product = {
   store: string;
   price: string;
   image: string;
+  images: string[];
   category: string;
 };
 
@@ -132,15 +134,10 @@ const sortedProducts = [...filteredProducts].sort((a, b) => {
             href={`/products/${product.slug}`}
             className="group overflow-hidden rounded-2xl border border-[#EAE6DF] bg-white transition hover:-translate-y-1"
           >
-            <div className="aspect-[4/3] overflow-hidden bg-[#F4F0E9]">
-              {product.image && (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                />
-              )}
-            </div>
+           <ProductImageGallery
+  images={product.images?.length ? product.images : [product.image]}
+  alt={product.name}
+/>
 
             <div className="p-4">
               <p className="text-sm text-[#7A827D]">

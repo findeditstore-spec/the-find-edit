@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { products } from "../../data/products";
 import { getProductBySlug } from "../../lib/products";
 import ShopButton from "../../components/ShopButton";
+import ProductImageGallery from "../../components/ProductImageGallery";
 
 type ProductPageProps = {
   params: Promise<{
@@ -41,21 +42,16 @@ const product = supabaseProduct ?? staticProduct;
 
         <div className="mt-12 grid gap-12 md:grid-cols-2">
 
-          <div className="aspect-square overflow-hidden rounded-3xl bg-[#F2EFE9]">
-  {product.image ? (
-    <img
-      src={product.image}
-      alt={product.name}
-      className="h-full w-full object-cover"
-    />
-  ) : (
-    <div className="flex h-full items-center justify-center">
-      <span className="text-sm text-[#9A958C]">
-        Product image
-      </span>
-    </div>
-  )}
-</div>
+          <ProductImageGallery
+  images={
+    product.images?.length
+      ? product.images
+      : product.image
+        ? [product.image]
+        : []
+  }
+  alt={product.name}
+/>
 
           <div className="flex flex-col justify-center">
 

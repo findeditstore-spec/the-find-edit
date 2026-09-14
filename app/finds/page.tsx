@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getProducts } from "../lib/products";
 import ProductSearch from "../components/ProductSearch";
 import FindsHeader from "../components/FindsHeader";

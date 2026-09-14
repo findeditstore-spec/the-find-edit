@@ -5,10 +5,14 @@ import { supabase } from "../../../lib/supabase";
 
 export default function AddProductPage() {
   const [message, setMessage] = useState("");
-  const [imageFile, setImageFile] = useState<File | null>(null);
-const [imagePreview, setImagePreview] = useState("");
-const [uploadingImage, setUploadingImage] = useState(false);
-const [imageUrl, setImageUrl] = useState("");
+  const [imageFiles, setImageFiles] = useState<(File | null)[]>([
+  null,
+  null,
+  null,
+]);
+const [imagePreviews, setImagePreviews] = useState<string[]>(["", "", ""]);
+const [uploadingImages, setUploadingImages] = useState(false);
+const [imageUrls, setImageUrls] = useState<string[]>(["", "", ""]);
 const [store, setStore] = useState("");
 const [categories, setCategories] = useState<
   {
@@ -70,7 +74,7 @@ const store =
     !subcategory ||
     !price ||
     !store ||
-    !imageUrl
+    !imageUrls[0]
   ) {
     setMessage(
       "Please complete all required fields and upload an image."
@@ -93,7 +97,8 @@ const store =
     slug,
     name,
     description,
-    image: imageUrl,
+    image: imageUrls[0],
+images: imageUrls.filter(Boolean),
     price,
     store,
     category,
@@ -110,55 +115,84 @@ const store =
 
   setMessage("Product saved successfully.");
   form.reset();
-  setImageFile(null);
-  setImagePreview("");
-  setImageUrl("");
+  setImageFiles([null, null, null]);
+setImagePreviews(["", "", ""]);
+setImageUrls(["", "", ""]);
 }
 
-  function handleImageChange(event: ChangeEvent<HTMLInputElement>) {
+  function handleImageChange(
+  event: ChangeEvent<HTMLInputElement>,
+  index: number
+) {
   const file = event.target.files?.[0];
 
   if (!file) {
     return;
   }
 
-  setImageFile(file);
-  setImagePreview(URL.createObjectURL(file));
+  const preview = URL.createObjectURL(file);
+
+  setImageFiles((current) => {
+    const updated = [...current];
+    updated[index] = file;
+    return updated;
+  });
+
+  setImagePreviews((current) => {
+    const updated = [...current];
+    updated[index] = preview;
+    return updated;
+  });
 }
 
-async function uploadImage() {
-  if (!imageFile) {
-    setMessage("Please choose an image first.");
+async function uploadImages() {
+  const filesToUpload = imageFiles.filter(
+    (file): file is File => file !== null
+  );
+
+  if (filesToUpload.length === 0) {
+    setMessage("Please choose at least one image first.");
     return;
   }
 
-  setUploadingImage(true);
+  setUploadingImages(true);
   setMessage("");
 
-  const fileExtension = imageFile.name.split(".").pop();
-  const fileName = `${crypto.randomUUID()}.${fileExtension}`;
-  const filePath = `products/${fileName}`;
+  const uploadedUrls = [...imageUrls];
 
-  const { error } = await supabase.storage
-    .from("product-images")
-    .upload(filePath, imageFile);
+  for (let index = 0; index < imageFiles.length; index++) {
+    const file = imageFiles[index];
 
-  if (error) {
-    setMessage(`Image upload failed: ${error.message}`);
-    setUploadingImage(false);
-    return;
-  }
+    if (!file) {
+      continue;
+    }
+
+    const fileExtension = file.name.split(".").pop();
+    const fileName = `${crypto.randomUUID()}.${fileExtension}`;
+    const filePath = `products/${fileName}`;
+
+    const { error } = await supabase.storage
+      .from("product-images")
+      .upload(filePath, file);
+
+    if (error) {
+      setMessage(`Image upload failed: ${error.message}`);
+      setUploadingImages(false);
+      return;
+    }
 
     const {
-    data: { publicUrl },
-  } = supabase.storage
-    .from("product-images")
-    .getPublicUrl(filePath);
+      data: { publicUrl },
+    } = supabase.storage
+      .from("product-images")
+      .getPublicUrl(filePath);
 
-    setImageUrl(publicUrl);
+    uploadedUrls[index] = publicUrl;
+  }
 
-  setMessage("Image uploaded successfully.");
-  setUploadingImage(false);
+  setImageUrls(uploadedUrls);
+  setMessage("Images uploaded successfully.");
+  setUploadingImages(false);
 }
 
   return (
@@ -242,54 +276,82 @@ async function uploadImage() {
 
           {/* Product Image */}
 <div>
-  <label
-    htmlFor="image"
-    className="block text-sm font-medium"
-  >
-    Product image
-  </label>
+  <div>
+  <p className="text-sm font-medium">Product images</p>
+  <p className="mt-1 text-xs text-[#6B7280]">
+    Add up to 3 images. Image 1 is the main product image.
+  </p>
+</div>
 
   <div className="mt-2 rounded-xl border border-dashed border-[#D8D2C8] bg-[#FFFDF9] p-6">
     <input
-      id="image"
-      name="image"
-      type="file"
-      accept="image/png,image/jpeg,image/webp"
-      onChange={handleImageChange}
-      className="block w-full text-sm text-[#5B6470]"
-    />
+  id="image-1"
+  name="image-1"
+  type="file"
+  accept="image/png,image/jpeg,image/webp"
+  onChange={(event) => handleImageChange(event, 0)}
+  className="block w-full text-sm text-[#5B6470]"
+/>
+
+<input
+  id="image-2"
+  name="image-2"
+  type="file"
+  accept="image/png,image/jpeg,image/webp"
+  onChange={(event) => handleImageChange(event, 1)}
+  className="mt-4 block w-full text-sm text-[#5B6470]"
+/>
+
+<input
+  id="image-3"
+  name="image-3"
+  type="file"
+  accept="image/png,image/jpeg,image/webp"
+  onChange={(event) => handleImageChange(event, 2)}
+  className="mt-4 block w-full text-sm text-[#5B6470]"
+/>
 
     <p className="mt-2 text-xs text-[#6B7280]">
       PNG, JPG or WebP. Choose a clear product image.
     </p>
   </div>
 
-  {imagePreview && (
-    <div className="mt-5">
-      <p className="mb-3 text-sm font-medium">
-        Preview
-      </p>
+  {imagePreviews.some(Boolean) && (
+  <div className="mt-5">
+    <p className="mb-3 text-sm font-medium">
+      Preview
+    </p>
 
-      <div className="overflow-hidden rounded-2xl border border-[#EAE6DF] bg-[#F4F0E9]">
-        <img
-          src={imagePreview}
-          alt="Product preview"
-          className="h-72 w-full object-contain"
-        />
-      </div>
+    <div className="grid gap-4 sm:grid-cols-3">
+      {imagePreviews.map(
+        (preview, index) =>
+          preview && (
+            <div
+              key={index}
+              className="overflow-hidden rounded-2xl border border-[#EAE6DF] bg-[#F4F0E9]"
+            >
+              <img
+                src={preview}
+                alt={`Product preview ${index + 1}`}
+                className="h-48 w-full object-contain"
+              />
+            </div>
+          )
+      )}
     </div>
-  )}
+  </div>
+)}
 
-  {imageFile && (
-    <button
-      type="button"
-      onClick={uploadImage}
-      disabled={uploadingImage}
-      className="mt-4 rounded-full border border-[#176B6B] px-6 py-3 text-sm font-medium text-[#176B6B] transition hover:bg-[#F4F0E9] disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {uploadingImage ? "Uploading..." : "Upload image"}
-    </button>
-  )}
+  {imageFiles.some(Boolean) && (
+  <button
+    type="button"
+    onClick={uploadImages}
+    disabled={uploadingImages}
+    className="mt-4 rounded-full border border-[#176B6B] px-6 py-3 text-sm font-medium text-[#176B6B] transition hover:bg-[#F4F0E9] disabled:cursor-not-allowed disabled:opacity-60"
+  >
+    {uploadingImages ? "Uploading..." : "Upload images"}
+  </button>
+)}
 </div>
 
           {/* Category / Subcategory */}
