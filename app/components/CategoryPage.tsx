@@ -146,39 +146,39 @@ const sortedProducts = [...filteredProducts].sort((a, b) => {
 
       {/* Products */}
       <section className="mx-auto max-w-6xl px-6 pb-24 md:px-12">
-        <div className="grid grid-cols-2 gap-x-4 gap-y-10 sm:gap-x-6 sm:gap-y-12 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-12 lg:grid-cols-3">
 
           {sortedProducts.map((product) => (
             <article key={product.name} className="group">
 
-              <div className="aspect-square overflow-hidden rounded-3xl bg-[#F2EFE9]">
+              <div className="aspect-square overflow-hidden rounded-[2rem] bg-[#F2EFE9]">
   <img
     src={product.image}
     alt={product.name}
-    className="h-full w-full object-cover"
+    className="h-full w-full object-cover transition duration-500 ease-out group-hover:scale-[1.03]"
   />
 </div>
 
               <div className="pt-5">
-                <h2 className="text-lg font-medium">
-                  {product.name}
-                </h2>
+  <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-[#7A827D]">
+    {product.store}
+  </p>
 
-                <p className="mt-2 text-sm text-[#176B6B]">
-                  {product.price}
-                </p>
+  <h2 className="mt-2 text-base font-medium leading-6 tracking-tight md:text-lg">
+    {product.name}
+  </h2>
 
-                <p className="mt-1 text-sm text-[#7A827D]">
-                  {product.store}
-                </p>
+  <p className="mt-2 text-base font-medium text-[#176B6B] md:text-lg">
+    {product.price}
+  </p>
 
-                <a
-  href={`/products/${product.slug}`}
-  className="mt-5 inline-block text-sm font-medium text-[#1F2937] transition hover:text-[#176B6B]"
->
-  View find →
-</a>
-              </div>
+  <a
+    href={`/products/${product.slug}`}
+    className="mt-5 flex w-full items-center justify-center rounded-full bg-[#176B6B] px-5 py-3 text-sm font-medium text-white transition-all duration-300 hover:opacity-90"
+  >
+    View find →
+  </a>
+</div>
 
             </article>
           ))}
