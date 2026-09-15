@@ -6,9 +6,11 @@ export const metadata: Metadata = {
   description:
     "The Find Edit helps South African shoppers discover affordable and interesting products across retailers through curated categories and collections.",
   other: {
-    "impact-site-verification":
-      "f7b5a514-93ec-4798-8dfa-5518560047ea",
-  },
+  "impact-site-verification":
+    "f7b5a514-93ec-4798-8dfa-5518560047ea",
+  "mitgo-verification":
+    "77b7ed6b-8e3d-41ad-aa0e-41fdf106c237",
+},
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
