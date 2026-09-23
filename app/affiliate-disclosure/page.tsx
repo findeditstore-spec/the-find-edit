@@ -1,132 +1,101 @@
+import { PageLayout, Container, Section, SectionHeader } from "../components/layout";
+
 export default function AffiliateDisclosurePage() {
   return (
-    <main className="min-h-screen bg-[#FFFDF9] text-[#1F2937]">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-[#EAE6DF] px-6 py-6 md:px-12">
-        <a
-          href="/"
-          className="text-xl font-semibold tracking-wide"
-        >
-          The Find Edit
-        </a>
-
-        <a
-          href="/"
-          className="text-sm text-[#5B6470] transition hover:text-[#176B6B]"
-        >
-          Back to home
-        </a>
-      </header>
-
+    <PageLayout>
       {/* Hero */}
-      <section className="px-6 py-20 md:px-12 md:py-28">
-        <div className="mx-auto max-w-4xl">
-          <p className="mb-5 text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B]">
-            Affiliate Disclosure
-          </p>
-
-          <h1 className="font-serif text-5xl font-medium tracking-tight md:text-7xl">
-            How The Find Edit makes money.
-          </h1>
-
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-[#5B6470] md:text-xl">
-            The Find Edit may earn a commission when you purchase a product
-            through some of the links on our website.
-          </p>
-        </div>
-      </section>
+      <Section background="cream" padding="xl">
+        <Container maxWidth="lg">
+          <SectionHeader
+            label="Affiliate Disclosure"
+            title="How The Find Edit makes money."
+            description="The Find Edit may earn a commission when you purchase a product through some of the links on our website."
+          />
+        </Container>
+      </Section>
 
       {/* Disclosure */}
-      <section className="border-y border-[#EAE6DF] bg-[#F4F0E9] px-6 py-20 md:px-12 md:py-28">
-        <div className="mx-auto max-w-4xl space-y-12">
-          <div>
-            <h2 className="font-serif text-3xl font-medium">
-              What are affiliate links?
-            </h2>
+      <Section background="sand" padding="xl">
+        <Container maxWidth="md">
+          <div className="space-y-12 prose prose-lg max-w-none">
+            <div>
+              <h2 className="font-serif text-3xl font-medium text-[#1F2937] mb-6">
+                What are affiliate links?
+              </h2>
+              <p className="text-[#5B6470] leading-relaxed">
+                Some of the links on The Find Edit are affiliate links. This
+                means that if you click a link and make a purchase from the
+                retailer, we may receive a commission at no additional cost to
+                you.
+              </p>
+            </div>
 
-            <p className="mt-5 leading-8 text-[#5B6470]">
-              Some of the links on The Find Edit are affiliate links. This
-              means that if you click a link and make a purchase from the
-              retailer, we may receive a commission at no additional cost to
-              you.
-            </p>
+            <div>
+              <h2 className="font-serif text-3xl font-medium text-[#1F2937] mb-6">
+                How this works
+              </h2>
+              <p className="text-[#5B6470] leading-relaxed">
+                When you click on certain product links, a small tracking code
+                lets the retailer know that you came from The Find Edit. If you
+                make a purchase, they may pay us a small percentage as a thank
+                you for the referral.
+              </p>
+              <p className="text-[#5B6470] leading-relaxed">
+                This does not increase the price you pay for the product. The
+                commission comes from the retailer's marketing budget, not from
+                your pocket.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-3xl font-medium text-[#1F2937] mb-6">
+                Our commitment
+              </h2>
+              <p className="text-[#5B6470] leading-relaxed">
+                Affiliate commissions do not influence which products we feature
+                or how we describe them. We only feature products that we
+                believe are worth your attention, regardless of whether they
+                generate income for us.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-3xl font-medium text-[#1F2937] mb-6">
+                Why we use affiliate links
+              </h2>
+              <p className="text-[#5B6470] leading-relaxed">
+                These commissions help support The Find Edit and allow us to
+                keep the website free for you to use. They help cover the costs
+                of maintaining the website and continuing to curate products.
+              </p>
+            </div>
+
+            <div>
+              <h2 className="font-serif text-3xl font-medium text-[#1F2937] mb-6">
+                Transparency
+              </h2>
+              <p className="text-[#5B6470] leading-relaxed">
+                We are committed to transparency about how The Find Edit operates.
+                If you have questions about affiliate links or how we select
+                products, please contact us at{" "}
+                <a
+                  href="mailto:findedit.store@gmail.com"
+                  className="text-[#176B6B] hover:text-[#125858] transition-colors"
+                >
+                  findedit.store@gmail.com
+                </a>
+                .
+              </p>
+            </div>
+
+            <div className="border-t border-[#EAE6DF] pt-8">
+              <p className="text-sm text-[#7A827D]">
+                Last updated: September 2026
+              </p>
+            </div>
           </div>
-
-          <div>
-            <h2 className="font-serif text-3xl font-medium">
-              Does this affect the price you pay?
-            </h2>
-
-            <p className="mt-5 leading-8 text-[#5B6470]">
-              No. Using an affiliate link does not add an additional cost to
-              your purchase. The price you pay is determined by the retailer.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-serif text-3xl font-medium">
-              Why do we use affiliate links?
-            </h2>
-
-            <p className="mt-5 leading-8 text-[#5B6470]">
-              Affiliate commissions help support the work behind The Find
-              Edit, including researching products, creating collections,
-              maintaining the website and making product discovery easier.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-serif text-3xl font-medium">
-              Our approach to recommendations
-            </h2>
-
-            <p className="mt-5 leading-8 text-[#5B6470]">
-              Our goal is to curate products that we believe are interesting,
-              useful, valuable or worth discovering. An affiliate relationship
-              does not guarantee that a product will be featured or
-              recommended.
-            </p>
-          </div>
-
-          <div>
-            <h2 className="font-serif text-3xl font-medium">
-              Where does the purchase happen?
-            </h2>
-
-            <p className="mt-5 leading-8 text-[#5B6470]">
-              The Find Edit does not process your payment or fulfil your order.
-              When you choose to shop for a product, you are taken to the
-              original retailer's website, where the purchase is completed
-              directly with them.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Final note */}
-      <section className="px-6 py-20 md:px-12 md:py-28">
-        <div className="mx-auto max-w-4xl">
-          <p className="text-lg leading-8 text-[#5B6470]">
-            We believe transparency matters. If you have any questions about
-            how affiliate links work on The Find Edit, please get in touch.
-          </p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="border-t border-[#EAE6DF] px-6 py-8 md:px-12">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm text-[#7A827D]">© 2026 The Find Edit</p>
-
-          <div className="flex flex-wrap gap-5 text-sm text-[#5B6470]">
-            <a href="/about">About</a>
-            <a href="/how-it-works">How it works</a>
-            <a href="/affiliate-disclosure">Affiliate disclosure</a>
-            <a href="/privacy">Privacy</a>
-            <a href="/contact">Contact</a>
-          </div>
-        </div>
-      </footer>
-    </main>
+        </Container>
+      </Section>
+    </PageLayout>
   );
 }

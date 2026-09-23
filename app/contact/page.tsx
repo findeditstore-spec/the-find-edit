@@ -1,45 +1,24 @@
+import { PageLayout, Container, Section, SectionHeader } from "../components/layout";
+import { Card } from "../components/ui";
+
 export default function ContactPage() {
   return (
-    <main className="min-h-screen bg-[#FFFDF9] text-[#1F2937]">
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-[#EAE6DF] px-6 py-6 md:px-12">
-        <a
-          href="/"
-          className="text-xl font-semibold tracking-wide"
-        >
-          The Find Edit
-        </a>
-
-        <a
-          href="/"
-          className="text-sm text-[#5B6470] transition hover:text-[#176B6B]"
-        >
-          Back to home
-        </a>
-      </header>
-
+    <PageLayout>
       {/* Hero */}
-      <section className="px-6 py-20 md:px-12 md:py-28">
-        <div className="mx-auto max-w-4xl">
-          <p className="mb-5 text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B]">
-            Contact
-          </p>
-
-          <h1 className="font-serif text-5xl font-medium tracking-tight md:text-7xl">
-            Have something to say?
-          </h1>
-
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-[#5B6470] md:text-xl">
-            Whether you have a question, a product suggestion, a collaboration
-            idea or simply want to say hello, we'd love to hear from you.
-          </p>
-        </div>
-      </section>
+      <Section background="cream" padding="xl">
+        <Container maxWidth="lg">
+          <SectionHeader
+            label="Contact"
+            title="Have something to say?"
+            description="Whether you have a question, a product suggestion, a collaboration idea or simply want to say hello, we'd love to hear from you."
+          />
+        </Container>
+      </Section>
 
       {/* Contact */}
-      <section className="border-y border-[#EAE6DF] bg-[#F4F0E9] px-6 py-20 md:px-12 md:py-28">
-        <div className="mx-auto max-w-4xl">
-          <div className="rounded-2xl border border-[#EAE6DF] bg-white p-8 md:p-12">
+      <Section background="sand" padding="xl">
+        <Container maxWidth="md">
+          <Card className="p-8 md:p-12">
             <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B]">
               Get in touch
             </p>
@@ -54,31 +33,45 @@ export default function ContactPage() {
             </p>
 
             <a
-              href="findedit.store@gmail.com"
+              href="mailto:findedit.store@gmail.com"
               className="mt-8 inline-block rounded-full bg-[#176B6B] px-7 py-3.5 text-sm font-medium text-white transition hover:bg-[#125858]"
             >
               Email The Find Edit →
             </a>
-          </div>
-        </div>
-      </section>
+          </Card>
+        </Container>
+      </Section>
 
-      {/* Footer */}
-      <footer className="border-t border-[#EAE6DF] px-6 py-8 md:px-12">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <p className="text-sm text-[#7A827D]">
-            © 2026 The Find Edit
-          </p>
+      {/* Additional Contact Info */}
+      <Section background="cream" padding="lg">
+        <Container maxWidth="md">
+          <div className="grid md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="font-serif text-xl font-medium text-[#1F2937] mb-4">
+                Business Enquiries
+              </h3>
+              <p className="text-[#5B6470] leading-relaxed mb-4">
+                Interested in partnerships, collaborations, or featuring your products on The Find Edit?
+              </p>
+              <p className="text-sm text-[#7A827D]">
+                We'll get back to you within 2-3 business days.
+              </p>
+            </div>
 
-          <div className="flex flex-wrap gap-5 text-sm text-[#5B6470]">
-            <a href="/about">About</a>
-            <a href="/how-it-works">How it works</a>
-            <a href="/affiliate-disclosure">Affiliate disclosure</a>
-            <a href="/privacy">Privacy</a>
-            <a href="/contact">Contact</a>
+            <div>
+              <h3 className="font-serif text-xl font-medium text-[#1F2937] mb-4">
+                Product Suggestions
+              </h3>
+              <p className="text-[#5B6470] leading-relaxed mb-4">
+                Found something amazing we should feature? We love hearing about great finds from our community.
+              </p>
+              <p className="text-sm text-[#7A827D]">
+                Include the product link and why you think it's worth featuring.
+              </p>
+            </div>
           </div>
-        </div>
-      </footer>
-    </main>
+        </Container>
+      </Section>
+    </PageLayout>
   );
 }

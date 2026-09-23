@@ -1,160 +1,151 @@
-"use client";
+import { notFound } from "next/navigation";
+import { getSupabaseServerClient } from "../../lib/supabase-server";
+import SiteHeader from "../../components/SiteHeader";
+import SiteFooter from "../../components/SiteFooter";
+import StandardProductCard from "../../components/product-cards/StandardProductCard";
+import Link from "next/link";
 
-import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabase";
-import ProductImageGallery from "../../components/ProductImageGallery";
-
-export default function CollectionPage() {
-  const [collection, setCollection] = useState<{
-    id: string;
-    name: string;
-    description: string | null;
-  } | null>(null);
-
-  const [loading, setLoading] = useState(true);
-  const [productIds, setProductIds] = useState<string[]>([]);
-const [collectionProducts, setCollectionProducts] = useState<
-  {
-    id: string;
-    name: string;
-    category: string;
-    image: string | null;
-    images: string[];
-    price: string;
+type CollectionPageProps = {
+  params: Promise<{
     slug: string;
-  }[]
->([]);
+  }>;
+};
 
-  useEffect(() => {
-    async function loadCollection() {
-      const slug = window.location.pathname.split("/")[2];
+async function getCollectionData(slug: string) {
+  const supabase = await getSupabaseServerClient();
 
-      const { data, error } = await supabase
-        .from("collections")
-        .select("id, name, description")
-        .eq("slug", slug)
-        .eq("status", "active")
-        .maybeSingle();
+  // Get collection
+  const { data: collection, error: collectionError } = await supabase
+    .from('collections')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'active')
+    .single();
 
-      if (error) {
-        console.error("Error loading collection:", error);
-        setLoading(false);
-        return;
-      }
-
-      setCollection(data);
-
-if (data) {
-  const { data: collectionProducts, error: productsError } =
-    await supabase
-      .from("collection_products")
-      .select("product_id")
-      .eq("collection_id", data.id);
-
-  if (productsError) {
-    console.error(
-      "Error loading collection products:",
-      productsError
-    );
-    setLoading(false);
-    return;
+  if (collectionError || !collection) {
+    return null;
   }
 
-  const ids =
-  collectionProducts?.map((item) => item.product_id) ?? [];
+  // Get products in this collection
+  const { data: collectionProducts } = await supabase
+    .from('collection_products')
+    .select('product_id')
+    .eq('collection_id', collection.id);
 
-setProductIds(ids);
+  const productIds = collectionProducts?.map(cp => cp.product_id) || [];
 
-if (ids.length > 0) {
-  const { data: products, error: productError } =
-    await supabase
-      .from("products")
-      .select("id, name, category, image, images, price, slug")
-      .in("id", ids)
-      .eq("status", "active");
-
-  if (productError) {
-    console.error(
-      "Error loading collection product details:",
-      productError
-    );
-    setLoading(false);
-    return;
+  if (productIds.length === 0) {
+    return { collection, products: [] };
   }
 
-  setCollectionProducts(products ?? []);
-}
+  const { data: products } = await supabase
+    .from('products')
+    .select('*')
+    .in('id', productIds)
+    .eq('status', 'active');
+
+  return { collection, products: products || [] };
 }
 
-setLoading(false);
-    }
+export default async function CollectionPage({ params }: CollectionPageProps) {
+  const { slug } = await params;
+  const data = await getCollectionData(slug);
 
-    loadCollection();
-  }, []);
+  if (!data) {
+    notFound();
+  }
+
+  const { collection, products } = data;
+
   return (
-    <main className="min-h-screen bg-[#FFFDF9] px-6 py-10 text-[#1F2937] md:px-10">
-      <div className="mx-auto max-w-6xl">
-        <a
-          href="/"
-          className="text-sm font-medium transition hover:text-[#176B6B]"
-        >
-          ← Back to The Find Edit
-        </a>
+    <div className="min-h-screen bg-[#FFFDF9] flex flex-col">
+      <SiteHeader />
 
-        <h1 className="mt-8 text-3xl font-semibold">
-  {loading ? "Loading..." : collection?.name ?? "Collection not found"}
-</h1>
-
-<p className="mt-2 text-sm text-[#6B7280]">
-  {collection?.description ||
-    "Curated finds from The Find Edit."}
-</p>
-
-        <section className="mt-10">
-  {collectionProducts.length === 0 ? (
-    <div className="rounded-2xl border border-[#EAE6DF] bg-white p-8">
-      <p className="text-sm text-[#6B7280]">
-        No products have been added to this collection yet.
-      </p>
-    </div>
-  ) : (
-    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {collectionProducts.map((product) => (
-        <div
-          key={product.id}
-          className="overflow-hidden rounded-2xl border border-[#EAE6DF] bg-white"
-        >
-          <ProductImageGallery
-  images={product.images?.length ? product.images : [product.image ?? ""]}
-  alt={product.name}
-/>
-
-          <div className="p-5">
-            <p className="text-xs uppercase tracking-wide text-[#6B7280]">
-              {product.category}
+      <main className="flex-1">
+        {/* Hero */}
+        <section className="px-6 md:px-12 py-16 bg-gradient-to-b from-[#F4F0E9] to-[#FFFDF9]">
+          <div className="max-w-7xl mx-auto text-center">
+            <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B] mb-4">
+              Curated Collection
             </p>
-
-            <h2 className="mt-2 font-medium">
-              {product.name}
-            </h2>
-
-            <p className="mt-2 text-sm text-[#6B7280]">
-              {product.price}
-            </p>
-
-            <a
-              href={`/products/${product.slug}`}
-              className="mt-5 inline-block text-sm font-medium transition hover:text-[#176B6B]"
-            >
-              View find →
-            </a>
+            <h1 className="font-serif text-5xl md:text-7xl font-medium text-[#1F2937] mb-6 tracking-tight">
+              {collection.name}
+            </h1>
+            {collection.description && (
+              <p className="text-lg text-[#5B6470] max-w-2xl mx-auto leading-relaxed">
+                {collection.description}
+              </p>
+            )}
           </div>
-        </div>
-      ))}
+        </section>
+
+        {/* Products */}
+        <section className="px-6 md:px-12 py-16">
+          <div className="max-w-7xl mx-auto">
+            {products.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="max-w-md mx-auto">
+                  <div className="w-20 h-20 bg-[#F4F0E9] rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg className="w-10 h-10 text-[#7A827D]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <h3 className="font-serif text-2xl font-medium text-[#1F2937] mb-4">
+                    Coming Soon
+                  </h3>
+                  <p className="text-[#5B6470] mb-8">
+                    We're currently curating products for this collection. Check back soon!
+                  </p>
+                  <Link
+                    href="/collections"
+                    className="inline-block px-8 py-4 bg-[#176B6B] text-white rounded-full font-medium hover:bg-[#125858] transition-colors"
+                  >
+                    View All Collections
+                  </Link>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="mb-8">
+                  <p className="text-sm text-[#7A827D]">
+                    {products.length} {products.length === 1 ? 'find' : 'finds'} in this collection
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {products.map((product: any) => (
+                    <StandardProductCard
+                      key={product.id}
+                      product={product}
+                      showBadge={product.featured}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="px-6 md:px-12 py-16 bg-[#1F2937] text-white">
+          <div className="max-w-7xl mx-auto text-center">
+            <h2 className="font-serif text-3xl md:text-4xl font-medium mb-6">
+              Discover More Collections
+            </h2>
+            <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+              Explore other curated collections handpicked by The Find Edit team.
+            </p>
+            <Link
+              href="/collections"
+              className="inline-block px-8 py-4 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#1F2937] transition-colors"
+            >
+              View All Collections
+            </Link>
+          </div>
+        </section>
+      </main>
+
+      <SiteFooter />
     </div>
-  )}
-</section>
-      </div>
-    </main>
   );
 }
