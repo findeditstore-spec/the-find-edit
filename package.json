@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "desktop:dev": "concurrently \"next dev\" \"cross-env NODE_ENV=development electron electron/main.js\"",
+    "desktop:build": "next build && electron-builder",
+    "desktop:dist": "npm run build && electron-builder --publish=never"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",
@@ -22,9 +25,52 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "electron": "^32.3.3",
+    "electron-builder": "^25.1.8",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "main": "electron/main.js",
+  "homepage": "./",
+  "build": {
+    "appId": "com.thefindedit.desktop",
+    "productName": "TFE - The Find Edit",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/",
+      "desktop/",
+      ".next/",
+      "public/",
+      "out/",
+      "app/favicon.ico"
+    ],
+    "extraFiles": [
+      {
+        "from": ".env.local",
+        "to": ".env.local",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "app/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "app/favicon.ico",
+      "uninstallerIcon": "app/favicon.ico",
+      "installerHeaderIcon": "app/favicon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
