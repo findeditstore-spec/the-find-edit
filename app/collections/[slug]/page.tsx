@@ -63,12 +63,12 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="px-6 md:px-12 py-16 bg-gradient-to-b from-[#F4F0E9] to-[#FFFDF9]">
+        <section className="px-4 sm:px-6 md:px-12 py-14 sm:py-20 bg-[#F4F0E9] border-b border-[#EAE6DF]">
           <div className="max-w-7xl mx-auto text-center">
-            <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B] mb-4">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#176B6B] mb-3">
               Curated Collection
             </p>
-            <h1 className="font-serif text-5xl md:text-7xl font-medium text-[#1F2937] mb-6 tracking-tight">
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-medium text-[#1F2937] mb-4 tracking-tight">
               {collection.name}
             </h1>
             {collection.description && (
@@ -112,7 +112,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                   {products.map((product: any) => (
                     <StandardProductCard
                       key={product.id}
@@ -127,19 +127,19 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
         </section>
 
         {/* CTA */}
-        <section className="px-6 md:px-12 py-16 bg-[#1F2937] text-white">
-          <div className="max-w-7xl mx-auto text-center">
-            <h2 className="font-serif text-3xl md:text-4xl font-medium mb-6">
+        <section className="px-4 sm:px-6 md:px-12 py-16 sm:py-20 bg-[#176B6B] text-white">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium mb-4 tracking-tight">
               Discover More Collections
             </h2>
-            <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-white/90 mb-8 max-w-xl mx-auto text-sm sm:text-base">
               Explore other curated collections handpicked by The Find Edit team.
             </p>
             <Link
               href="/collections"
-              className="inline-block px-8 py-4 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#1F2937] transition-colors"
+              className="inline-block px-8 py-3.5 bg-white text-[#176B6B] rounded-full text-sm font-medium hover:bg-[#F4F0E9] transition-colors shadow-sm"
             >
-              View All Collections
+              View All Collections →
             </Link>
           </div>
         </section>

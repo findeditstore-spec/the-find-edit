@@ -1,5 +1,6 @@
 "use client";
 
+import AdminLayout from "../_components/AdminLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
@@ -17,12 +18,10 @@ export default function CollectionsPage() {
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [collectionName, setCollectionName] = useState("");
-const [savingCollection, setSavingCollection] = useState(false);
-const [message, setMessage] = useState("");
-const [editingCollectionId, setEditingCollectionId] = useState<string | null>(
-  null
-);
-const [editName, setEditName] = useState("");
+  const [savingCollection, setSavingCollection] = useState(false);
+  const [message, setMessage] = useState("");
+  const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   useEffect(() => {
     async function loadCollections() {
@@ -43,320 +42,298 @@ const [editName, setEditName] = useState("");
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#FFFDF9] px-6 py-10 text-[#1F2937] md:px-10">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-[#6B7280]">
-              The Find Edit
-            </p>
+    <AdminLayout
+      currentSection="collections"
+      title="Collections"
+      description="Create and manage curated product collections."
+    >
+      <div className="space-y-6">
+        <button
+          type="button"
+          onClick={() => setShowCreateForm(true)}
+          className="rounded-lg bg-[#176B6B] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#125858]"
+        >
+          Create collection
+        </button>
 
-            <h1 className="mt-2 text-3xl font-semibold">
-              Collections
-            </h1>
+        {showCreateForm && (
+          <div className="rounded-lg border border-[#EAE6DF] bg-[#FFFDF9] p-6">
+            <h3 className="text-base font-semibold text-[#18302F]">
+              Create collection
+            </h3>
 
-            <p className="mt-2 text-sm text-[#6B7280]">
-              Create and manage curated product collections.
-            </p>
+            <div className="mt-4">
+              <label
+                htmlFor="collection-name"
+                className="block text-sm font-medium text-[#18302F]"
+              >
+                Collection name
+              </label>
+
+              <input
+                id="collection-name"
+                type="text"
+                value={collectionName}
+                onChange={(event) => setCollectionName(event.target.value)}
+                placeholder="e.g. Soft Glam"
+                className="mt-2 w-full rounded-lg border border-[#EAE6DF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#176B6B] focus:ring-1 focus:ring-[#176B6B]"
+              />
+            </div>
+
+            <div className="mt-4 flex gap-3">
+              <button
+                type="button"
+                disabled={savingCollection}
+                onClick={async () => {
+                  const name = collectionName.trim();
+
+                  if (!name) {
+                    setMessage("Please enter a collection name.");
+                    return;
+                  }
+
+                  setSavingCollection(true);
+                  setMessage("");
+
+                  const slug = name
+                    .toLowerCase()
+                    .trim()
+                    .replace(/[^a-z0-9]+/g, "-")
+                    .replace(/^-+|-+$/g, "");
+
+                  const { error } = await supabase
+                    .from("collections")
+                    .insert({
+                      name,
+                      slug,
+                      status: "active",
+                    });
+
+                  if (error) {
+                    console.error("Error creating collection:", error);
+                    setMessage(
+                      error.message || "Unable to create collection."
+                    );
+                    setSavingCollection(false);
+                    return;
+                  }
+
+                  setCollectionName("");
+                  setShowCreateForm(false);
+                  setSavingCollection(false);
+                  setMessage("Collection created successfully.");
+
+                  const { data } = await supabase
+                    .from("collections")
+                    .select("*")
+                    .order("created_at", { ascending: false });
+
+                  setCollections(data ?? []);
+                }}
+                className="rounded-lg bg-[#176B6B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#125858] disabled:opacity-50"
+              >
+                {savingCollection ? "Saving..." : "Save collection"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCreateForm(false);
+                  setMessage("");
+                }}
+                className="rounded-lg border border-[#EAE6DF] px-4 py-2.5 text-sm font-medium transition hover:bg-[#F4F0E9] hover:border-[#176B6B]"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
+        )}
 
-          <a
-            href="/admin"
-            className="text-sm font-medium transition hover:text-[#176B6B]"
-          >
-            Back to dashboard
-          </a>
-        </div>
+        {message && (
+          <div className={`rounded-lg px-4 py-3 text-sm ${
+            message.includes("successfully")
+              ? "bg-[#E5F3EC] text-[#23684A] border border-[#CFE1D4]"
+              : "bg-[#FFF6E8] text-[#76511D] border border-[#E8D5B8]"
+          }`}>
+            {message}
+          </div>
+        )}
 
-        <section className="mt-10 rounded-2xl border border-[#EAE6DF] bg-white p-8">
-          <div className="mb-6 flex items-center justify-between">
-  <h2 className="text-lg font-medium">
-    Your collections
-  </h2>
-
-  <button
-  type="button"
-  onClick={() => setShowCreateForm(true)}
-  className="rounded-full bg-[#176B6B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
->
-  Create collection
-</button>
-</div>
-
-{showCreateForm && (
-  <div className="mb-6 rounded-2xl border border-[#EAE6DF] bg-[#FFFDF9] p-6">
-    <h3 className="text-base font-medium">
-      Create collection
-    </h3>
-
-    <div className="mt-5">
-      <label
-        htmlFor="collection-name"
-        className="text-sm font-medium"
-      >
-        Collection name
-      </label>
-
-      <input
-        id="collection-name"
-        type="text"
-        value={collectionName}
-onChange={(event) => setCollectionName(event.target.value)}
-        placeholder="e.g. Soft Glam"
-        className="mt-2 w-full rounded-xl border border-[#EAE6DF] bg-white px-4 py-3 outline-none transition focus:border-[#176B6B]"
-      />
-    </div>
-
-    <div className="mt-5 flex gap-3">
-      <button
-  type="button"
-  disabled={savingCollection}
-  onClick={async () => {
-    const name = collectionName.trim();
-
-    if (!name) {
-      setMessage("Please enter a collection name.");
-      return;
-    }
-
-    setSavingCollection(true);
-    setMessage("");
-
-    const slug = name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
-
-    const { error } = await supabase
-      .from("collections")
-      .insert({
-        name,
-        slug,
-        status: "active",
-      });
-
-    if (error) {
-  console.error("Error creating collection:", {
-    message: error.message,
-    code: error.code,
-    details: error.details,
-    hint: error.hint,
-  });
-
-  setMessage(
-    error.message ||
-      error.details ||
-      error.hint ||
-      "Unable to create collection."
-  );
-
-  setSavingCollection(false);
-  return;
-}
-
-    setCollectionName("");
-    setShowCreateForm(false);
-    setSavingCollection(false);
-    setMessage("Collection created successfully.");
-
-    const { data } = await supabase
-      .from("collections")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    setCollections(data ?? []);
-  }}
-  className="rounded-full bg-[#176B6B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
->
-  {savingCollection ? "Saving..." : "Save collection"}
-</button>
-
-      <button
-        type="button"
-        onClick={() => setShowCreateForm(false)}
-        className="rounded-full border border-[#EAE6DF] px-5 py-2.5 text-sm font-medium transition hover:border-[#176B6B]"
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-)}
-
+        <section className="rounded-lg border border-[#EAE6DF] bg-white p-6">
           {collections.length === 0 ? (
-  <p className="mt-2 text-sm text-[#6B7280]">
-    No collections created yet.
-  </p>
-) : (
-  <div className="space-y-3">
-    {collections.map((collection) => (
-      <div
-  key={collection.id}
-  className="rounded-xl border border-[#EAE6DF] bg-[#FFFDF9] px-5 py-4"
->
-        <div>
-          <p className="font-medium">
-            {collection.name}
-          </p>
+            <p className="py-8 text-center text-sm text-[#687572]">
+              No collections created yet.
+            </p>
+          ) : (
+            <div className="divide-y divide-[#EEF0EB]">
+              {collections.map((collection) => (
+                <div
+                  key={collection.id}
+                  className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between first:pt-0 last:pb-0"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-medium text-[#18302F]">
+                      {collection.name}
+                    </p>
+                    <p className="mt-1 text-xs text-[#687572]">
+                      {collection.slug}
+                    </p>
+                  </div>
 
-          <p className="mt-1 text-sm text-[#6B7280]">
-            {collection.slug}
-          </p>
-        </div>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <span
+                      className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+                        collection.status === "active"
+                          ? "bg-[#E5F3EC] text-[#23684A]"
+                          : "bg-[#F0F1EF] text-[#687572]"
+                      }`}
+                    >
+                      {collection.status === "active" ? "Active" : "Draft"}
+                    </span>
 
-        {editingCollectionId === collection.id && (
-  <div className="mt-3 rounded-2xl border border-[#EAE6DF] bg-[#FFFDF9] p-6">
-    <h3 className="text-base font-medium">
-      Edit collection
-    </h3>
+                    <a
+                      href={`/admin/collections/${collection.id}/products`}
+                      className="text-xs font-semibold text-[#176B6B] transition hover:underline"
+                    >
+                      Manage
+                    </a>
 
-    <div className="mt-5">
-      <label
-        htmlFor={`edit-collection-${collection.id}`}
-        className="text-sm font-medium"
-      >
-        Collection name
-      </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingCollectionId(collection.id);
+                        setEditName(collection.name);
+                        setMessage("");
+                      }}
+                      className="text-xs font-semibold text-[#176B6B] transition hover:underline"
+                    >
+                      Edit
+                    </button>
 
-      <input
-        id={`edit-collection-${collection.id}`}
-        type="text"
-        value={editName}
-        onChange={(event) => setEditName(event.target.value)}
-        className="mt-2 w-full rounded-xl border border-[#EAE6DF] bg-white px-4 py-3 outline-none transition focus:border-[#176B6B]"
-      />
-    </div>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const confirmed = window.confirm(
+                          `Delete "${collection.name}"?`
+                        );
 
-    <div className="mt-5 flex gap-3">
-      <button
-  type="button"
-  onClick={async () => {
-    const name = editName.trim();
+                        if (!confirmed) {
+                          return;
+                        }
 
-    if (!name) {
-      setMessage("Please enter a collection name.");
-      return;
-    }
+                        const { error } = await supabase
+                          .from("collections")
+                          .delete()
+                          .eq("id", collection.id);
 
-    const slug = name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "");
+                        if (error) {
+                          console.error("Error deleting collection:", error);
+                          setMessage(error.message);
+                          return;
+                        }
 
-    const { error } = await supabase
-      .from("collections")
-      .update({
-        name,
-        slug,
-      })
-      .eq("id", collection.id);
+                        setCollections((current) =>
+                          current.filter((item) => item.id !== collection.id)
+                        );
 
-    if (error) {
-      console.error("Error updating collection:", error);
-      setMessage(error.message);
-      return;
-    }
+                        setMessage("Collection deleted successfully.");
+                      }}
+                      className="text-xs font-semibold text-red-600 transition hover:opacity-70"
+                    >
+                      Delete
+                    </button>
+                  </div>
 
-    setCollections((current) =>
-      current.map((item) =>
-        item.id === collection.id
-          ? {
-              ...item,
-              name,
-              slug,
-            }
-          : item
-      )
-    );
+                  {editingCollectionId === collection.id && (
+                    <div className="col-span-full mt-4 rounded-lg border border-[#EAE6DF] bg-[#FFFDF9] p-6">
+                      <h3 className="text-base font-semibold text-[#18302F]">
+                        Edit collection
+                      </h3>
 
-    setEditingCollectionId(null);
-    setMessage("Collection updated successfully.");
-  }}
-  className="rounded-full bg-[#176B6B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
->
-  Save changes
-</button>
+                      <div className="mt-4">
+                        <label
+                          htmlFor={`edit-collection-${collection.id}`}
+                          className="block text-sm font-medium text-[#18302F]"
+                        >
+                          Collection name
+                        </label>
 
-      <button
-        type="button"
-        onClick={() => setEditingCollectionId(null)}
-        className="rounded-full border border-[#EAE6DF] px-5 py-2.5 text-sm font-medium transition hover:border-[#176B6B]"
-      >
-        Cancel
-      </button>
-    </div>
-  </div>
-)}
+                        <input
+                          id={`edit-collection-${collection.id}`}
+                          type="text"
+                          value={editName}
+                          onChange={(event) => setEditName(event.target.value)}
+                          className="mt-2 w-full rounded-lg border border-[#EAE6DF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#176B6B] focus:ring-1 focus:ring-[#176B6B]"
+                        />
+                      </div>
 
-        <div className="flex items-center gap-3">
-            <button
-  type="button"
-  onClick={() => {
-    setEditingCollectionId(collection.id);
-    setEditName(collection.name);
-    setMessage("");
-  }}
-  className="text-sm font-medium transition hover:text-[#176B6B]"
->
-  Edit
-</button>
+                      <div className="mt-4 flex gap-3">
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            const name = editName.trim();
 
-<a
-  href={`/admin/collections/${collection.id}/products`}
-  className="text-sm font-medium transition hover:text-[#176B6B]"
->
-  Manage products
-</a>
-  <span
-    className={`rounded-full px-3 py-1 text-xs font-medium ${
-      collection.status === "active"
-        ? "bg-[#E7F2EF] text-[#176B6B]"
-        : "bg-[#F4F0E9] text-[#6B7280]"
-    }`}
-  >
-    {collection.status === "active" ? "Active" : "Draft"}
-  </span>
+                            if (!name) {
+                              setMessage("Please enter a collection name.");
+                              return;
+                            }
 
-  <button
-  type="button"
-  onClick={async () => {
-    const confirmed = window.confirm(
-      `Delete "${collection.name}"?`
-    );
+                            const slug = name
+                              .toLowerCase()
+                              .trim()
+                              .replace(/[^a-z0-9]+/g, "-")
+                              .replace(/^-+|-+$/g, "");
 
-    if (!confirmed) {
-      return;
-    }
+                            const { error } = await supabase
+                              .from("collections")
+                              .update({
+                                name,
+                                slug,
+                              })
+                              .eq("id", collection.id);
 
-    const { error } = await supabase
-      .from("collections")
-      .delete()
-      .eq("id", collection.id);
+                            if (error) {
+                              console.error("Error updating collection:", error);
+                              setMessage(error.message);
+                              return;
+                            }
 
-    if (error) {
-      console.error("Error deleting collection:", error);
-      setMessage(error.message);
-      return;
-    }
+                            setCollections((current) =>
+                              current.map((item) =>
+                                item.id === collection.id
+                                  ? {
+                                      ...item,
+                                      name,
+                                      slug,
+                                    }
+                                  : item
+                              )
+                            );
 
-    setCollections((current) =>
-      current.filter((item) => item.id !== collection.id)
-    );
+                            setEditingCollectionId(null);
+                            setMessage("Collection updated successfully.");
+                          }}
+                          className="rounded-lg bg-[#176B6B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#125858]"
+                        >
+                          Save changes
+                        </button>
 
-    setMessage("Collection deleted successfully.");
-  }}
-  className="text-sm font-medium text-red-600 transition hover:opacity-70"
->
-  Delete
-</button>
-</div>
-      </div>
-    ))}
-  </div>
-)}
+                        <button
+                          type="button"
+                          onClick={() => setEditingCollectionId(null)}
+                          className="rounded-lg border border-[#EAE6DF] px-4 py-2.5 text-sm font-medium transition hover:bg-[#F4F0E9] hover:border-[#176B6B]"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </div>
-    </main>
+    </AdminLayout>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import AdminLayout from "../../../_components/AdminLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "../../../../lib/supabase";
 

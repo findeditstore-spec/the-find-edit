@@ -4,7 +4,7 @@ import { getSupabaseServerClient } from "../../lib/supabase-server";
 import SiteHeader from "../../components/SiteHeader";
 import SiteFooter from "../../components/SiteFooter";
 import ProductImageGallery from "../../components/ProductImageGallery";
-import ShopButton from "../../components/ShopButton";
+import ProductDetailActions from "../../components/ProductDetailActions";
 import StandardProductCard from "../../components/product-cards/StandardProductCard";
 import Badge from "../../components/ui/Badge";
 import Link from "next/link";
@@ -121,13 +121,19 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   </p>
                 </div>
 
-                {/* Actions */}
-                <div className="space-y-4 mb-6">
-                  <ShopButton
-                    productId={product.id}
-                    productName={product.name}
-                    store={product.store}
-                    affiliateLink={product.affiliate_link}
+                {/* Actions: SAVE, COMPARE, SHOP */}
+                <div className="mb-6">
+                  <ProductDetailActions
+                    product={{
+                      id: product.id,
+                      slug: product.slug,
+                      name: product.name,
+                      image: product.image,
+                      price: product.price,
+                      store: product.store,
+                      category: product.category,
+                      affiliate_link: product.affiliate_link,
+                    }}
                   />
                 </div>
 
@@ -144,18 +150,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Similar Finds */}
         {similarProducts && similarProducts.length > 0 && (
-          <section className="px-6 md:px-12 py-16 bg-[#F4F0E9]">
+          <section className="px-4 sm:px-6 md:px-12 py-14 sm:py-20 bg-[#F4F0E9] border-t border-[#EAE6DF]">
             <div className="max-w-7xl mx-auto">
-              <div className="mb-8">
-                <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B] mb-3">
+              <div className="mb-8 sm:mb-10">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#176B6B] mb-2">
                   More Like This
                 </p>
-                <h2 className="font-serif text-3xl md:text-4xl font-medium text-[#1F2937]">
+                <h2 className="font-serif text-3xl sm:text-4xl font-medium text-[#1F2937] tracking-tight">
                   Similar Finds
                 </h2>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {similarProducts.map((similarProduct: any) => (
                   <StandardProductCard
                     key={similarProduct.id}

@@ -1,5 +1,6 @@
 "use client";
 
+import AdminLayout from "../_components/AdminLayout";
 import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase";
 
@@ -42,32 +43,21 @@ const [editName, setEditName] = useState("");
   }, []);
 
   return (
-    <main className="min-h-screen bg-[#FFFDF9] px-6 py-10 text-[#1F2937] md:px-10">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-[#6B7280]">
-              The Find Edit
-            </p>
+    <AdminLayout
+      currentSection="categories"
+      title="Categories"
+      description="Create and manage your product categories."
+    >
+      <div className="space-y-6">
+        <button
+          type="button"
+          onClick={() => setShowCreateForm(true)}
+          className="rounded-lg bg-[#176B6B] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#125858]"
+        >
+          Add category
+        </button>
 
-            <h1 className="mt-2 text-3xl font-semibold">
-              Categories
-            </h1>
-
-            <p className="mt-2 text-sm text-[#6B7280]">
-              Create and manage your product categories.
-            </p>
-          </div>
-
-          <a
-            href="/admin"
-            className="text-sm font-medium transition hover:text-[#176B6B]"
-          >
-            Back to dashboard
-          </a>
-        </div>
-
-        <section className="mt-10 rounded-2xl border border-[#EAE6DF] bg-white p-8">
+        <section className="rounded-lg border border-[#EAE6DF] bg-white p-6">
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-lg font-medium">
               Your categories
@@ -83,15 +73,15 @@ const [editName, setEditName] = useState("");
           </div>
 
           {showCreateForm && (
-            <div className="mb-6 rounded-2xl border border-[#EAE6DF] bg-[#FFFDF9] p-6">
-              <h3 className="text-base font-medium">
+            <div className="mb-6 rounded-lg border border-[#EAE6DF] bg-[#FFFDF9] p-6">
+              <h3 className="text-base font-semibold text-[#18302F]">
                 Add category
               </h3>
 
-              <div className="mt-5">
+              <div className="mt-4">
                 <label
                   htmlFor="category-name"
-                  className="text-sm font-medium"
+                  className="block text-sm font-medium text-[#18302F]"
                 >
                   Category name
                 </label>
@@ -104,11 +94,11 @@ const [editName, setEditName] = useState("");
                     setCategoryName(event.target.value)
                   }
                   placeholder="e.g. Home & Living"
-                  className="mt-2 w-full rounded-xl border border-[#EAE6DF] bg-white px-4 py-3 outline-none transition focus:border-[#176B6B]"
+                  className="mt-2 w-full rounded-lg border border-[#EAE6DF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#176B6B] focus:ring-1 focus:ring-[#176B6B]"
                 />
               </div>
 
-              <div className="mt-5 flex gap-3">
+              <div className="mt-4 flex gap-3">
                 <button
                   type="button"
                   disabled={savingCategory}
@@ -168,7 +158,7 @@ const [editName, setEditName] = useState("");
 
                     setCategories(data ?? []);
                   }}
-                  className="rounded-full bg-[#176B6B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                  className="rounded-lg bg-[#176B6B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#125858] disabled:opacity-50"
                 >
                   {savingCategory
                     ? "Saving..."
@@ -181,7 +171,7 @@ const [editName, setEditName] = useState("");
                     setShowCreateForm(false);
                     setMessage("");
                   }}
-                  className="rounded-full border border-[#EAE6DF] px-5 py-2.5 text-sm font-medium transition hover:border-[#176B6B]"
+                  className="rounded-lg border border-[#EAE6DF] px-4 py-2.5 text-sm font-medium transition hover:bg-[#F4F0E9] hover:border-[#176B6B]"
                 >
                   Cancel
                 </button>
@@ -190,117 +180,119 @@ const [editName, setEditName] = useState("");
           )}
 
           {message && (
-            <p className="mb-5 text-sm text-[#176B6B]">
+            <div className={`mb-4 rounded-lg px-4 py-3 text-sm ${
+              message.includes("successfully")
+                ? "bg-[#E5F3EC] text-[#23684A] border border-[#CFE1D4]"
+                : "bg-[#FFF6E8] text-[#76511D] border border-[#E8D5B8]"
+            }`}>
               {message}
-            </p>
+            </div>
           )}
 
           {categories.length === 0 ? (
-            <p className="mt-2 text-sm text-[#6B7280]">
+            <p className="py-8 text-center text-sm text-[#687572]">
               No categories created yet.
             </p>
           ) : (
-            <div className="space-y-3">
+            <div className="divide-y divide-[#EEF0EB]">
               {categories.map((category) => (
   <div
     key={category.id}
-    className="rounded-xl border border-[#EAE6DF] bg-[#FFFDF9] px-5 py-4"
+    className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between first:pt-0 last:pb-0"
   >
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="font-medium">
-          {category.name}
-        </p>
+    <div className="min-w-0 flex-1">
+      <p className="font-medium text-[#18302F]">
+        {category.name}
+      </p>
 
-        <p className="mt-1 text-sm text-[#6B7280]">
-          {category.slug}
-        </p>
-      </div>
+      <p className="mt-1 text-xs text-[#687572]">
+        {category.slug}
+      </p>
+    </div>
 
-      <div className="flex items-center gap-3">
-<a
-  href={`/${category.slug}`}
-  className="text-sm font-medium transition hover:text-[#176B6B]"
->
-  View
-</a>
+    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+      <span
+        className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide ${
+          category.status === "active"
+            ? "bg-[#E5F3EC] text-[#23684A]"
+            : "bg-[#F0F1EF] text-[#687572]"
+        }`}
+      >
+        {category.status === "active"
+          ? "Active"
+          : "Draft"}
+      </span>
 
-        <button
-          type="button"
-          onClick={() => {
-            setEditingCategoryId(category.id);
-            setEditName(category.name);
-            setMessage("");
-          }}
-          className="text-sm font-medium transition hover:text-[#176B6B]"
-        >
-          Edit
-        </button>
+      <a
+        href={`/${category.slug}`}
+        className="text-xs font-semibold text-[#176B6B] transition hover:underline"
+      >
+        View
+      </a>
 
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            category.status === "active"
-              ? "bg-[#E7F2EF] text-[#176B6B]"
-              : "bg-[#F4F0E9] text-[#6B7280]"
-          }`}
-        >
-          {category.status === "active"
-            ? "Active"
-            : "Draft"}
-        </span>
+      <button
+        type="button"
+        onClick={() => {
+          setEditingCategoryId(category.id);
+          setEditName(category.name);
+          setMessage("");
+        }}
+        className="text-xs font-semibold text-[#176B6B] transition hover:underline"
+      >
+        Edit
+      </button>
 
-        <button
-          type="button"
-          onClick={async () => {
-            const confirmed = window.confirm(
-              `Delete "${category.name}"?`
+      <button
+        type="button"
+        onClick={async () => {
+          const confirmed = window.confirm(
+            `Delete "${category.name}"?`
+          );
+
+          if (!confirmed) {
+            return;
+          }
+
+          const { error } = await supabase
+            .from("categories")
+            .delete()
+            .eq("id", category.id);
+
+          if (error) {
+            console.error(
+              "Error deleting category:",
+              error
             );
+            setMessage(error.message);
+            return;
+          }
 
-            if (!confirmed) {
-              return;
-            }
+          setCategories((current) =>
+            current.filter(
+              (item) => item.id !== category.id
+            )
+          );
 
-            const { error } = await supabase
-              .from("categories")
-              .delete()
-              .eq("id", category.id);
-
-            if (error) {
-              console.error(
-                "Error deleting category:",
-                error
-              );
-              setMessage(error.message);
-              return;
-            }
-
-            setCategories((current) =>
-              current.filter(
-                (item) => item.id !== category.id
-              )
-            );
-
-            setMessage(
-              "Category deleted successfully."
-            );
-          }}
-          className="text-sm font-medium text-red-600 transition hover:opacity-70"
-        >
-          Delete
-        </button>
-      </div>
+          setMessage(
+            "Category deleted successfully."
+          );
+        }}
+        className="text-xs font-semibold text-red-600 transition hover:opacity-70"
+      >
+        Delete
+      </button>
     </div>
 
     {editingCategoryId === category.id && (
-      <div className="mt-5 rounded-2xl border border-[#EAE6DF] bg-white p-6">
-        <h3 className="text-base font-medium">
+      <div className="col-span-full mt-4 rounded-lg border border-[#EAE6DF] bg-[#FFFDF9] p-6">
+        <h3 className="text-base font-semibold text-[#18302F]">
           Edit category
         </h3>
 
-        <div className="mt-5">
+        <div className="mt-4">
           <label
             htmlFor={`edit-category-${category.id}`}
-            className="text-sm font-medium"
+            className="block text-sm font-medium text-[#18302F]"
           >
             Category name
           </label>
@@ -312,11 +304,11 @@ const [editName, setEditName] = useState("");
             onChange={(event) =>
               setEditName(event.target.value)
             }
-            className="mt-2 w-full rounded-xl border border-[#EAE6DF] bg-[#FFFDF9] px-4 py-3 outline-none transition focus:border-[#176B6B]"
+            className="mt-2 w-full rounded-lg border border-[#EAE6DF] bg-white px-4 py-2.5 text-sm outline-none transition focus:border-[#176B6B] focus:ring-1 focus:ring-[#176B6B]"
           />
         </div>
 
-        <div className="mt-5 flex gap-3">
+        <div className="mt-4 flex gap-3">
           <button
             type="button"
             onClick={async () => {
@@ -369,7 +361,7 @@ const [editName, setEditName] = useState("");
                 "Category updated successfully."
               );
             }}
-            className="rounded-full bg-[#176B6B] px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90"
+            className="rounded-lg bg-[#176B6B] px-4 py-2.5 text-sm font-medium text-white transition hover:bg-[#125858]"
           >
             Save changes
           </button>
@@ -379,7 +371,7 @@ const [editName, setEditName] = useState("");
             onClick={() =>
               setEditingCategoryId(null)
             }
-            className="rounded-full border border-[#EAE6DF] px-5 py-2.5 text-sm font-medium transition hover:border-[#176B6B]"
+            className="rounded-lg border border-[#EAE6DF] px-4 py-2.5 text-sm font-medium transition hover:bg-[#F4F0E9] hover:border-[#176B6B]"
           >
             Cancel
           </button>
@@ -392,6 +384,6 @@ const [editName, setEditName] = useState("");
           )}
         </section>
       </div>
-    </main>
+    </AdminLayout>
   );
 }

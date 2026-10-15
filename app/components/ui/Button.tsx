@@ -25,11 +25,11 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     const baseStyles = 'inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
 
     const variants = {
-      primary: `bg-[${colors.teal.DEFAULT}] text-white hover:bg-[${colors.teal.dark}] focus:ring-[${colors.teal.DEFAULT}]`,
-      secondary: `bg-[${colors.sand}] text-[${colors.text.primary}] hover:bg-[${colors.border}] focus:ring-[${colors.teal.DEFAULT}]`,
-      outline: `border-2 border-[${colors.teal.DEFAULT}] text-[${colors.teal.DEFAULT}] hover:bg-[${colors.teal.DEFAULT}] hover:text-white focus:ring-[${colors.teal.DEFAULT}]`,
-      ghost: `text-[${colors.text.primary}] hover:bg-[${colors.sand}] focus:ring-[${colors.teal.DEFAULT}]`,
-      link: `text-[${colors.teal.DEFAULT}] hover:underline focus:ring-0`,
+      primary: 'bg-[#176B6B] text-white hover:bg-[#125858] focus:ring-[#176B6B]',
+      secondary: 'bg-[#F4F0E9] text-[#1F2937] hover:bg-[#EAE6DF] focus:ring-[#176B6B]',
+      outline: 'border-2 border-[#176B6B] text-[#176B6B] hover:bg-[#176B6B] hover:text-white focus:ring-[#176B6B]',
+      ghost: 'text-[#1F2937] hover:bg-[#F4F0E9] focus:ring-[#176B6B]',
+      link: 'text-[#176B6B] hover:underline focus:ring-0',
     };
 
     const sizes = {

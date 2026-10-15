@@ -1,5 +1,6 @@
 "use client";
 
+import AdminLayout from "../_components/AdminLayout";
 import { useEffect, useState } from "react";
 import {
   LineChart,
@@ -202,329 +203,235 @@ if (sortedDates.length > 0) {
 }
 
   return (
-    <main className="min-h-screen bg-[#FFFDF9] text-[#1F2937]">
-      {/* Header */}
-      <header className="border-b border-[#EAE6DF] px-6 py-6 md:px-12">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <a
-            href="/admin"
-            className="text-xl font-semibold tracking-wide"
+    <AdminLayout
+      currentSection="analytics"
+      title="Analytics"
+      description="Track product clicks, retailer activity, and category performance."
+    >
+      <div className="space-y-6">
+        {/* Date Range Filter */}
+        <div>
+          <select
+            value={dateRange}
+            onChange={(event) => setDateRange(event.target.value)}
+            className="rounded-lg border border-[#EAE6DF] bg-white px-4 py-2.5 text-sm text-[#18302F] outline-none transition focus:border-[#176B6B] focus:ring-1 focus:ring-[#176B6B]"
           >
-            The Find Edit
-          </a>
-
-          <a
-            href="/admin"
-            className="text-sm text-[#5B6470] transition hover:text-[#176B6B]"
-          >
-            ← Back to Admin
-          </a>
+            <option value="all">All time</option>
+            <option value="7">Last 7 days</option>
+            <option value="30">Last 30 days</option>
+            <option value="year">This year</option>
+          </select>
         </div>
-      </header>
 
-      {/* Content */}
-      <section className="px-6 py-16 md:px-12 md:py-24">
-        <div className="mx-auto max-w-6xl">
-          <p className="mb-4 text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B]">
-            Analytics
-          </p>
-
-          <h1 className="font-serif text-5xl font-medium tracking-tight md:text-7xl">
-            Understand what people are finding.
-          </h1>
-
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#5B6470]">
-            Track product clicks, retailer activity and the finds getting the
-            most attention.
-          </p>
-
-          <div className="mt-8">
-  <select
-    value={dateRange}
-    onChange={(event) => setDateRange(event.target.value)}
-    className="rounded-full border border-[#EAE6DF] bg-white px-5 py-3 text-sm text-[#5B6470] outline-none transition focus:border-[#176B6B]"
-  >
-    <option value="all">All time</option>
-    <option value="7">Last 7 days</option>
-    <option value="30">Last 30 days</option>
-    <option value="year">This year</option>
-  </select>
-</div>
-
-          {/* Analytics Overview */}
-<div className="mt-16 grid gap-6 md:grid-cols-3">
-  <div className="rounded-2xl border border-[#EAE6DF] bg-white p-8">
-    <p className="text-sm text-[#7A827D]">
-      Total Clicks
-    </p>
-
-    <p className="mt-4 text-4xl font-medium">
-      {loading ? "—" : totalClicks}
-    </p>
-  </div>
-
-  <div className="rounded-2xl border border-[#EAE6DF] bg-white p-8">
-    <p className="text-sm text-[#7A827D]">
-      Unique Products
-    </p>
-
-    <p className="mt-4 text-4xl font-medium">
-      {loading ? "—" : uniqueProducts}
-    </p>
-  </div>
-
-  <div className="rounded-2xl border border-[#EAE6DF] bg-white p-8">
-    <p className="text-sm text-[#7A827D]">
-      Top Retailer
-    </p>
-
-    <p className="mt-4 text-4xl font-medium">
-      {loading ? "—" : topRetailer}
-    </p>
-  </div>
-  </div>
-
-  {/* Top Products */}
-<div className="mt-10 rounded-2xl border border-[#EAE6DF] bg-white p-8 md:p-10">
-  <div className="flex items-center justify-between">
-    <div>
-      <p className="text-sm text-[#7A827D]">
-        Product Performance
-      </p>
-
-      <h2 className="mt-2 font-serif text-3xl font-medium">
-        Most-clicked products
-      </h2>
-    </div>
-  </div>
-
-  <div className="mt-8 divide-y divide-[#EAE6DF]">
-    {loading ? (
-      <p className="py-6 text-sm text-[#7A827D]">
-        Loading analytics...
-      </p>
-    ) : topProducts.length === 0 ? (
-      <p className="py-6 text-sm text-[#7A827D]">
-        No product clicks yet.
-      </p>
-    ) : (
-      topProducts.map((product, index) => (
-        <div
-          key={`${product.name}-${product.store}`}
-          className="flex flex-col gap-3 py-5 md:flex-row md:items-center md:justify-between"
-        >
-          <div className="flex items-start gap-4">
-            <span className="text-sm text-[#7A827D]">
-              {index + 1}
-            </span>
-
-            <div>
-              <p className="font-medium">
-                {product.name}
-              </p>
-
-              <p className="mt-1 text-sm text-[#7A827D]">
-                {product.store}
-              </p>
-            </div>
-          </div>
-
-          <p className="text-sm font-medium text-[#176B6B]">
-            {product.clicks} {product.clicks === 1 ? "click" : "clicks"}
-          </p>
-        </div>
-      ))
-    )}
-  </div>
-</div>
-
-{/* Retailer & Category Performance */}
-<div className="mt-8 grid gap-6 lg:grid-cols-2">
-
-  {/* Retailer Performance */}
-  <div className="rounded-2xl border border-[#EAE6DF] bg-white p-8 md:p-10">
-    <div>
-      <p className="text-sm text-[#7A827D]">
-        Retailer Performance
-      </p>
-
-      <h2 className="mt-2 font-serif text-3xl font-medium">
-        Most-clicked retailers
-      </h2>
-    </div>
-
-    <div className="mt-8 divide-y divide-[#EAE6DF]">
-      {loading ? (
-        <p className="py-6 text-sm text-[#7A827D]">
-          Loading analytics...
-        </p>
-      ) : topRetailers.length === 0 ? (
-        <p className="py-6 text-sm text-[#7A827D]">
-          No retailer clicks yet.
-        </p>
-      ) : (
-        topRetailers.map(([store, count], index) => (
-          <div
-            key={store}
-            className="flex items-center justify-between py-5"
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-[#7A827D]">
-                {index + 1}
-              </span>
-
-              <p className="font-medium">
-                {store}
-              </p>
-            </div>
-
-            <p className="text-sm font-medium text-[#176B6B]">
-              {count} {count === 1 ? "click" : "clicks"}
+        {/* Key Metrics */}
+        <div className="grid gap-6 sm:grid-cols-3">
+          <div className="rounded-lg border border-[#EAE6DF] bg-white p-6">
+            <p className="text-sm text-[#687572]">Total Clicks</p>
+            <p className="mt-3 text-3xl font-semibold text-[#18302F]">
+              {loading ? "—" : totalClicks}
             </p>
           </div>
-        ))
-      )}
-    </div>
-  </div>
 
-  {/* Category Performance */}
-  <div className="rounded-2xl border border-[#EAE6DF] bg-white p-8 md:p-10">
-    <div>
-      <p className="text-sm text-[#7A827D]">
-        Category Performance
-      </p>
-
-      <h2 className="mt-2 font-serif text-3xl font-medium">
-        Most-clicked categories
-      </h2>
-    </div>
-
-    <div className="mt-8 divide-y divide-[#EAE6DF]">
-      {loading ? (
-        <p className="py-6 text-sm text-[#7A827D]">
-          Loading analytics...
-        </p>
-      ) : topCategories.length === 0 ? (
-        <p className="py-6 text-sm text-[#7A827D]">
-          No category clicks yet.
-        </p>
-      ) : (
-        topCategories.map(([category, count], index) => (
-          <div
-            key={category}
-            className="flex items-center justify-between py-5"
-          >
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-[#7A827D]">
-                {index + 1}
-              </span>
-
-              <p className="font-medium">
-                {category}
-              </p>
-            </div>
-
-            <p className="text-sm font-medium text-[#176B6B]">
-              {count} {count === 1 ? "click" : "clicks"}
+          <div className="rounded-lg border border-[#EAE6DF] bg-white p-6">
+            <p className="text-sm text-[#687572]">Unique Products</p>
+            <p className="mt-3 text-3xl font-semibold text-[#18302F]">
+              {loading ? "—" : uniqueProducts}
             </p>
           </div>
-        ))
-      )}
-    </div>
-  </div>
 
-</div>
+          <div className="rounded-lg border border-[#EAE6DF] bg-white p-6">
+            <p className="text-sm text-[#687572]">Top Retailer</p>
+            <p className="mt-3 text-3xl font-semibold text-[#18302F]">
+              {loading ? "—" : topRetailer}
+            </p>
+          </div>
+        </div>
 
-{/* Clicks Over Time */}
-<div className="mt-10 rounded-2xl border border-[#EAE6DF] bg-white p-8 md:p-10">
-  <div>
-    <p className="text-sm text-[#7A827D]">
-      Traffic
-    </p>
+        {/* Most-Clicked Products */}
+        <section className="rounded-lg border border-[#EAE6DF] bg-white p-6">
+          <h2 className="font-serif text-xl font-semibold text-[#18302F]">
+            Most-clicked products
+          </h2>
 
-    <h2 className="mt-2 font-serif text-3xl font-medium">
-      Clicks Over Time
-    </h2>
-  </div>
+          <div className="mt-6 divide-y divide-[#EEF0EB]">
+            {loading ? (
+              <p className="py-6 text-sm text-[#687572]">Loading analytics...</p>
+            ) : topProducts.length === 0 ? (
+              <p className="py-6 text-sm text-[#687572]">No product clicks yet.</p>
+            ) : (
+              topProducts.map((product, index) => (
+                <div
+                  key={`${product.name}-${product.store}`}
+                  className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between first:pt-0 last:pb-0"
+                >
+                  <div className="flex items-start gap-3">
+                    <span className="text-sm font-medium text-[#687572]">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-[#18302F]">{product.name}</p>
+                      <p className="mt-1 text-xs text-[#687572]">{product.store}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm font-medium text-[#176B6B]">
+                    {product.clicks} {product.clicks === 1 ? "click" : "clicks"}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
 
-  <div className="mt-8">
-    {loading ? (
-      <p className="py-6 text-sm text-[#7A827D]">
-        Loading analytics...
-      </p>
-    ) : clicksOverTime.length === 0 ? (
-      <p className="py-6 text-sm text-[#7A827D]">
-        No click data yet.
-      </p>
-    ) : (
-      <div className="h-80 w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={clicksOverTime}
-            margin={{
-              top: 10,
-              right: 10,
-              left: -20,
-              bottom: 0,
-            }}
-          >
-            <CartesianGrid
-              stroke="#EAE6DF"
-              strokeDasharray="3 3"
-            />
+        {/* Retailer & Category Performance */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Top Retailers */}
+          <section className="rounded-lg border border-[#EAE6DF] bg-white p-6">
+            <h2 className="font-serif text-xl font-semibold text-[#18302F]">
+              Most-clicked retailers
+            </h2>
 
-            <XAxis
-              dataKey="date"
-              tickFormatter={(value) =>
-                new Date(`${value}T00:00:00`).toLocaleDateString(
-                  "en-ZA",
-                  {
-                    day: "numeric",
-                    month: "short",
-                  }
-                )
-              }
-              tick={{ fill: "#7A827D", fontSize: 12 }}
-              axisLine={{ stroke: "#EAE6DF" }}
-              tickLine={false}
-            />
+            <div className="mt-6 divide-y divide-[#EEF0EB]">
+              {loading ? (
+                <p className="py-6 text-sm text-[#687572]">Loading analytics...</p>
+              ) : topRetailers.length === 0 ? (
+                <p className="py-6 text-sm text-[#687572]">No retailer clicks yet.</p>
+              ) : (
+                topRetailers.map(([store, count], index) => (
+                  <div
+                    key={store}
+                    className="flex items-center justify-between py-4 first:pt-0 last:pb-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-[#687572]">
+                        {index + 1}
+                      </span>
+                      <p className="font-medium text-[#18302F]">{store}</p>
+                    </div>
+                    <p className="text-sm font-medium text-[#176B6B]">
+                      {count} {count === 1 ? "click" : "clicks"}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
 
-            <YAxis
-              allowDecimals={false}
-              tick={{ fill: "#7A827D", fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-            />
+          {/* Top Categories */}
+          <section className="rounded-lg border border-[#EAE6DF] bg-white p-6">
+            <h2 className="font-serif text-xl font-semibold text-[#18302F]">
+              Most-clicked categories
+            </h2>
 
-            <Tooltip
-              labelFormatter={(value) =>
-                new Date(`${value}T00:00:00`).toLocaleDateString(
-                  "en-ZA",
-                  {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  }
-                )
-              }
-            />
+            <div className="mt-6 divide-y divide-[#EEF0EB]">
+              {loading ? (
+                <p className="py-6 text-sm text-[#687572]">Loading analytics...</p>
+              ) : topCategories.length === 0 ? (
+                <p className="py-6 text-sm text-[#687572]">No category clicks yet.</p>
+              ) : (
+                topCategories.map(([category, count], index) => (
+                  <div
+                    key={category}
+                    className="flex items-center justify-between py-4 first:pt-0 last:pb-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-[#687572]">
+                        {index + 1}
+                      </span>
+                      <p className="font-medium text-[#18302F]">{category}</p>
+                    </div>
+                    <p className="text-sm font-medium text-[#176B6B]">
+                      {count} {count === 1 ? "click" : "clicks"}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
 
-            <Line
-              type="monotone"
-              dataKey="clicks"
-              stroke="#176B6B"
-              strokeWidth={2.5}
-              dot={{ fill: "#176B6B", r: 4 }}
-              activeDot={{ r: 6 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        {/* Clicks Over Time Chart */}
+        <section className="rounded-lg border border-[#EAE6DF] bg-white p-6">
+          <h2 className="font-serif text-xl font-semibold text-[#18302F]">
+            Clicks over time
+          </h2>
+
+          <div className="mt-6">
+            {loading ? (
+              <p className="py-12 text-center text-sm text-[#687572]">
+                Loading analytics...
+              </p>
+            ) : clicksOverTime.length === 0 ? (
+              <p className="py-12 text-center text-sm text-[#687572]">
+                No click data yet.
+              </p>
+            ) : (
+              <div className="h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={clicksOverTime}
+                    margin={{
+                      top: 10,
+                      right: 10,
+                      left: -20,
+                      bottom: 0,
+                    }}
+                  >
+                    <CartesianGrid
+                      stroke="#EAE6DF"
+                      strokeDasharray="3 3"
+                    />
+
+                    <XAxis
+                      dataKey="date"
+                      tickFormatter={(value) =>
+                        new Date(`${value}T00:00:00`).toLocaleDateString(
+                          "en-ZA",
+                          {
+                            day: "numeric",
+                            month: "short",
+                          }
+                        )
+                      }
+                      tick={{ fill: "#687572", fontSize: 12 }}
+                      axisLine={{ stroke: "#EAE6DF" }}
+                      tickLine={false}
+                    />
+
+                    <YAxis
+                      allowDecimals={false}
+                      tick={{ fill: "#687572", fontSize: 12 }}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+
+                    <Tooltip
+                      labelFormatter={(value) =>
+                        new Date(`${value}T00:00:00`).toLocaleDateString(
+                          "en-ZA",
+                          {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          }
+                        )
+                      }
+                    />
+
+                    <Line
+                      type="monotone"
+                      dataKey="clicks"
+                      stroke="#176B6B"
+                      strokeWidth={2.5}
+                      dot={{ fill: "#176B6B", r: 4 }}
+                      activeDot={{ r: 6 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
-    )}
-  </div>
-</div>
-        </div>
-      </section>
-    </main>
+    </AdminLayout>
   );
 }

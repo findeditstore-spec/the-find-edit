@@ -47,16 +47,22 @@ async function getHomePageData() {
     categoriesResult,
     collectionsResult
   ] = await Promise.all([
-    supabase.from('products').select('*').eq('status', 'active').eq('featured', true).limit(1).single(),
-    supabase.from('products').select('*').eq('status', 'active').order('created_at', { ascending: false }).limit(6),
+    supabase.from('products').select('*').eq('status', 'active').eq('featured', true).limit(1).maybeSingle(),
+    supabase.from('products').select('*').eq('status', 'active').order('created_at', { ascending: false }).limit(8),
     supabase.from('products').select('*').eq('status', 'active').eq('category', 'Fashion').order('created_at', { ascending: false }).limit(4),
     supabase.from('products').select('*').eq('status', 'active').eq('category', 'Creator Tech').order('created_at', { ascending: false }).limit(4),
     supabase.from('categories').select('*').eq('status', 'active').order('name'),
     supabase.from('collections').select('*').eq('status', 'active').order('name').limit(4)
   ]);
 
+  let featuredProduct = featuredResult.data;
+  // If no product is explicitly flagged as featured, use the latest premier active product from real catalogue data
+  if (!featuredProduct && latestResult.data && latestResult.data.length > 0) {
+    featuredProduct = latestResult.data[0];
+  }
+
   return {
-    featured: featuredResult.data,
+    featured: featuredProduct,
     latest: latestResult.data || [],
     fashion: fashionResult.data || [],
     tech: techResult.data || [],
@@ -68,128 +74,147 @@ async function getHomePageData() {
 export default async function HomePage() {
   const data = await getHomePageData();
 
+  // If featured product was taken from latest, avoid immediate duplicate in trending row
+  const trendingList = data.featured
+    ? data.latest.filter(p => p.id !== data.featured?.id).slice(0, 4)
+    : data.latest.slice(0, 4);
+
   return (
     <div className="min-h-screen bg-[#FFFDF9] flex flex-col">
       <SiteHeader />
 
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative min-h-[85vh] flex items-center justify-center px-6 md:px-12 py-20 overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle, #176B6B 1px, transparent 1px)',
-              backgroundSize: '40px 40px'
-            }} />
+        {/* Editorial Hero Section */}
+        <section className="relative min-h-[80vh] flex items-center justify-center px-4 sm:px-6 md:px-12 py-16 sm:py-24 overflow-hidden">
+          {/* Subtle Texture Pattern */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: 'radial-gradient(circle, #176B6B 1px, transparent 1px)',
+                backgroundSize: '36px 36px',
+              }}
+            />
           </div>
 
           <div className="relative max-w-7xl mx-auto w-full">
-            <div className="text-center mb-16">
-              {/* Tagline */}
-              <p className="text-xs md:text-sm font-medium uppercase tracking-[0.3em] text-[#176B6B] mb-6">
+            <div className="text-center mb-12 sm:mb-16">
+              {/* Brand Tagline */}
+              <p className="text-xs md:text-sm font-semibold uppercase tracking-[0.3em] text-[#176B6B] mb-5 sm:mb-6">
                 Discover • Compare • Shop Smarter
               </p>
 
-              {/* Main Headline */}
-              <h1 className="font-serif text-5xl md:text-7xl lg:text-8xl font-medium text-[#1F2937] mb-8 tracking-tight">
+              {/* Editorial Headline */}
+              <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-medium text-[#1F2937] mb-6 sm:mb-8 tracking-tight leading-[1.08]">
                 GOOD FINDS.<br />
                 <span className="text-[#176B6B]">A BETTER YOU.</span>
               </h1>
 
-              {/* Supporting Text */}
-              <p className="text-lg md:text-xl text-[#5B6470] max-w-2xl mx-auto leading-relaxed mb-12">
+              {/* Supporting Statement */}
+              <p className="text-base sm:text-lg md:text-xl text-[#5B6470] max-w-2xl mx-auto leading-relaxed mb-8 sm:mb-12 font-normal">
                 Discover, compare and shop curated finds across fashion, tech, home, lifestyle and more.
               </p>
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              {/* Editorial CTAs */}
+              <div className="flex flex-col sm:flex-row gap-3.5 sm:gap-4 justify-center items-center">
                 <Link
                   href="/finds"
-                  className="inline-block px-8 py-4 bg-[#176B6B] text-white rounded-full font-medium hover:bg-[#125858] transition-colors"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-[#176B6B] text-white rounded-full text-sm font-medium hover:bg-[#125858] transition-colors shadow-sm"
                 >
                   Explore The Finds
                 </Link>
                 <Link
                   href="/collections"
-                  className="inline-block px-8 py-4 border-2 border-[#176B6B] text-[#176B6B] rounded-full font-medium hover:bg-[#176B6B] hover:text-white transition-colors"
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 border border-[#176B6B] text-[#176B6B] rounded-full text-sm font-medium hover:bg-[#176B6B] hover:text-white transition-colors"
                 >
                   Browse Collections
                 </Link>
               </div>
             </div>
 
-            {/* Floating Category Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+            {/* Curated Categories Strip */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto">
               {data.categories.slice(0, 4).map((category: Category) => (
                 <Link
                   key={category.id}
                   href={`/${category.slug}`}
-                  className="group relative bg-white border border-[#EAE6DF] rounded-2xl p-6 hover:shadow-lg transition-all hover:-translate-y-1"
+                  className="group bg-white/90 border border-[#EAE6DF] rounded-xl sm:rounded-2xl p-4 sm:p-5 hover:border-[#176B6B]/60 hover:shadow-sm transition-all"
                 >
-                  <h3 className="font-serif text-xl font-medium text-[#1F2937] group-hover:text-[#176B6B] transition-colors">
+                  <p className="text-[0.65rem] uppercase tracking-wider text-[#7A827D] mb-1">
+                    Explore
+                  </p>
+                  <h3 className="font-serif text-base sm:text-lg font-medium text-[#1F2937] group-hover:text-[#176B6B] transition-colors leading-snug">
                     {category.name}
                   </h3>
-                  <p className="text-sm text-[#7A827D] mt-2">Explore →</p>
+                  <span className="text-xs font-medium text-[#176B6B] mt-2 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
+                    <span>View</span>
+                    <span>→</span>
+                  </span>
                 </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Featured Product */}
+        {/* Featured Find Spotlight (Real Catalogue Data) */}
         {data.featured && (
-          <section className="px-6 md:px-12 py-16 bg-[#F4F0E9]">
+          <section className="px-4 sm:px-6 md:px-12 py-14 sm:py-20 bg-[#F4F0E9] border-y border-[#EAE6DF]">
             <div className="max-w-7xl mx-auto">
-              <div className="mb-8">
-                <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B] mb-3">
-                  TFE Pick
+              <div className="mb-8 sm:mb-10">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#176B6B] mb-2">
+                  Editorial Spotlight
                 </p>
-                <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#1F2937]">
+                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#1F2937] tracking-tight">
                   This Week's Featured Find
                 </h2>
               </div>
 
               <FeaturedProductCard
                 product={data.featured}
-                editorial="Handpicked by our editorial team for its exceptional quality, style, and value."
+                editorial={
+                  data.featured.description ||
+                  "Handpicked by our editorial team for its exceptional quality, thoughtful design, and value."
+                }
               />
             </div>
           </section>
         )}
 
         {/* Trending Now */}
-        {data.latest.length > 0 && (
-          <section className="px-6 md:px-12 py-20">
+        {trendingList.length > 0 && (
+          <section className="px-4 sm:px-6 md:px-12 py-16 sm:py-24">
             <div className="max-w-7xl mx-auto">
-              <div className="flex items-end justify-between mb-12">
+              <div className="flex items-end justify-between mb-8 sm:mb-12">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B] mb-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#176B6B] mb-2">
                     Latest Finds
                   </p>
-                  <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#1F2937]">
+                  <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#1F2937] tracking-tight">
                     Trending Now
                   </h2>
                 </div>
                 <Link
-                  href="/finds"
-                  className="hidden md:block text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
+                  href="/trending"
+                  className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
                 >
-                  View All →
+                  <span>View All Trending</span>
+                  <span>→</span>
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {data.latest.slice(0, 4).map((product: Product) => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                {trendingList.map((product: Product) => (
                   <StandardProductCard key={product.id} product={product} showBadge={product.featured} />
                 ))}
               </div>
 
-              <div className="mt-8 text-center md:hidden">
+              <div className="mt-8 text-center sm:hidden">
                 <Link
-                  href="/finds"
-                  className="inline-block text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
+                  href="/trending"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
                 >
-                  View All →
+                  <span>View All Trending</span>
+                  <span>→</span>
                 </Link>
               </div>
             </div>
@@ -198,37 +223,39 @@ export default async function HomePage() {
 
         {/* Fashion Edit */}
         {data.fashion.length > 0 && (
-          <section className="px-6 md:px-12 py-20 bg-[#F4F0E9]">
+          <section className="px-4 sm:px-6 md:px-12 py-16 sm:py-24 bg-[#F4F0E9] border-y border-[#EAE6DF]">
             <div className="max-w-7xl mx-auto">
-              <div className="flex items-end justify-between mb-12">
+              <div className="flex items-end justify-between mb-8 sm:mb-12">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B] mb-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#176B6B] mb-2">
                     Curated Selection
                   </p>
-                  <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#1F2937]">
+                  <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#1F2937] tracking-tight">
                     Fashion Edit
                   </h2>
                 </div>
                 <Link
                   href="/fashion"
-                  className="hidden md:block text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
+                  className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
                 >
-                  Explore Fashion →
+                  <span>Explore Fashion</span>
+                  <span>→</span>
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {data.fashion.map((product: Product) => (
                   <StandardProductCard key={product.id} product={product} />
                 ))}
               </div>
 
-              <div className="mt-8 text-center md:hidden">
+              <div className="mt-8 text-center sm:hidden">
                 <Link
                   href="/fashion"
-                  className="inline-block text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
                 >
-                  Explore Fashion →
+                  <span>Explore Fashion</span>
+                  <span>→</span>
                 </Link>
               </div>
             </div>
@@ -237,80 +264,92 @@ export default async function HomePage() {
 
         {/* Tech Worth Knowing */}
         {data.tech.length > 0 && (
-          <section className="px-6 md:px-12 py-20">
+          <section className="px-4 sm:px-6 md:px-12 py-16 sm:py-24">
             <div className="max-w-7xl mx-auto">
-              <div className="flex items-end justify-between mb-12">
+              <div className="flex items-end justify-between mb-8 sm:mb-12">
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B] mb-3">
-                    Tech Finds
+                  <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#176B6B] mb-2">
+                    Curated Tech
                   </p>
-                  <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#1F2937]">
+                  <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#1F2937] tracking-tight">
                     Tech Worth Knowing
                   </h2>
                 </div>
                 <Link
                   href="/creator-tech"
-                  className="hidden md:block text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
+                  className="hidden sm:inline-flex items-center gap-1 text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
                 >
-                  Explore Tech →
+                  <span>Explore Creator Tech</span>
+                  <span>→</span>
                 </Link>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {data.tech.map((product: Product) => (
                   <StandardProductCard key={product.id} product={product} />
                 ))}
               </div>
 
-              <div className="mt-8 text-center md:hidden">
+              <div className="mt-8 text-center sm:hidden">
                 <Link
                   href="/creator-tech"
-                  className="inline-block text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
+                  className="inline-flex items-center gap-1 text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
                 >
-                  Explore Tech →
+                  <span>Explore Creator Tech</span>
+                  <span>→</span>
                 </Link>
               </div>
             </div>
           </section>
         )}
 
-        {/* Collections */}
+        {/* Curated Collections Showcase */}
         {data.collections.length > 0 && (
-          <section className="px-6 md:px-12 py-20 bg-[#1F2937] text-white">
+          <section className="px-4 sm:px-6 md:px-12 py-16 sm:py-24 bg-[#F4F0E9] border-y border-[#EAE6DF]">
             <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-12">
-                <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#C9A86A] mb-3">
+              <div className="text-center mb-10 sm:mb-14">
+                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#C9A86A] mb-3">
                   Curated For You
                 </p>
-                <h2 className="font-serif text-4xl md:text-5xl font-medium">
+                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#1F2937] tracking-tight">
                   Discover By Collection
                 </h2>
+                <p className="mt-3 text-sm sm:text-base text-[#5B6470] max-w-xl mx-auto">
+                  Finds brought together around themes, lifestyles, and occasions.
+                </p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                 {data.collections.map((collection: Collection) => (
                   <Link
                     key={collection.id}
                     href={`/collections/${collection.slug}`}
-                    className="group bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/10 transition-all"
+                    className="group bg-white border border-[#EAE6DF] rounded-xl sm:rounded-2xl p-6 sm:p-7 hover:border-[#176B6B] hover:shadow-sm transition-all flex flex-col justify-between"
                   >
-                    <h3 className="font-serif text-2xl font-medium mb-3 group-hover:text-[#C9A86A] transition-colors">
-                      {collection.name}
-                    </h3>
-                    <p className="text-sm text-gray-400 mb-4 line-clamp-2">
-                      {collection.description || 'Explore this curated collection'}
-                    </p>
-                    <span className="text-sm font-medium text-[#C9A86A]">
-                      Explore →
+                    <div>
+                      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-[#176B6B] mb-2">
+                        Collection
+                      </p>
+                      <h3 className="font-serif text-xl sm:text-2xl font-medium text-[#1F2937] mb-2.5 group-hover:text-[#176B6B] transition-colors">
+                        {collection.name}
+                      </h3>
+                      <p className="text-xs sm:text-sm text-[#5B6470] leading-relaxed line-clamp-2 mb-4">
+                        {collection.description || 'Explore this curated collection of finds.'}
+                      </p>
+                    </div>
+
+                    <span className="text-xs font-medium text-[#176B6B] flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                      <span>Explore Collection</span>
+                      <span>→</span>
                     </span>
                   </Link>
                 ))}
               </div>
 
-              <div className="text-center mt-12">
+              <div className="text-center mt-10 sm:mt-12">
                 <Link
                   href="/collections"
-                  className="inline-block px-8 py-4 border-2 border-white text-white rounded-full font-medium hover:bg-white hover:text-[#1F2937] transition-colors"
+                  className="inline-block px-8 py-3.5 border border-[#176B6B] text-[#176B6B] rounded-full text-sm font-medium hover:bg-[#176B6B] hover:text-white transition-colors"
                 >
                   View All Collections
                 </Link>
@@ -319,60 +358,64 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* How It Works */}
-        <section className="px-6 md:px-12 py-20">
+        {/* How It Works — Core Journey */}
+        <section className="px-4 sm:px-6 md:px-12 py-16 sm:py-24">
           <div className="max-w-5xl mx-auto text-center">
-            <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B] mb-6">
+            <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[#176B6B] mb-4">
               How It Works
             </p>
-            <h2 className="font-serif text-4xl md:text-5xl font-medium text-[#1F2937] mb-16">
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-medium text-[#1F2937] mb-4 tracking-tight">
               Your Shopping Journey
             </h2>
+            <p className="text-sm sm:text-base text-[#5B6470] max-w-xl mx-auto mb-14 sm:mb-16">
+              A smarter way to discover, evaluate, and purchase quality finds.
+            </p>
 
-            <div className="grid md:grid-cols-3 gap-12">
-              <div>
-                <div className="w-16 h-16 bg-[#176B6B] rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
+            <div className="grid md:grid-cols-3 gap-8 sm:gap-12 text-left">
+              <div className="bg-white border border-[#EAE6DF] rounded-2xl p-7 sm:p-8">
+                <div className="w-12 h-12 bg-[#176B6B] rounded-full flex items-center justify-center text-white text-lg font-bold mb-6">
                   1
                 </div>
-                <h3 className="font-serif text-2xl font-medium text-[#1F2937] mb-4">
+                <h3 className="font-serif text-2xl font-medium text-[#1F2937] mb-3">
                   Discover
                 </h3>
-                <p className="text-[#5B6470] leading-relaxed">
-                  Browse curated finds across categories, handpicked for quality and value.
+                <p className="text-sm text-[#5B6470] leading-relaxed">
+                  Browse handpicked products across fashion, creator tech, lifestyle and home—selected for design and value.
                 </p>
               </div>
 
-              <div>
-                <div className="w-16 h-16 bg-[#176B6B] rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
+              <div className="bg-white border border-[#EAE6DF] rounded-2xl p-7 sm:p-8">
+                <div className="w-12 h-12 bg-[#176B6B] rounded-full flex items-center justify-center text-white text-lg font-bold mb-6">
                   2
                 </div>
-                <h3 className="font-serif text-2xl font-medium text-[#1F2937] mb-4">
-                  Compare
+                <h3 className="font-serif text-2xl font-medium text-[#1F2937] mb-3">
+                  Compare & Save
                 </h3>
-                <p className="text-[#5B6470] leading-relaxed">
-                  Understand product details, read our editorial notes, and make informed choices.
+                <p className="text-sm text-[#5B6470] leading-relaxed">
+                  Save your favourites to your wishlist and compare features, prices, and retailers side-by-side.
                 </p>
               </div>
 
-              <div>
-                <div className="w-16 h-16 bg-[#176B6B] rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">
+              <div className="bg-white border border-[#EAE6DF] rounded-2xl p-7 sm:p-8">
+                <div className="w-12 h-12 bg-[#176B6B] rounded-full flex items-center justify-center text-white text-lg font-bold mb-6">
                   3
                 </div>
-                <h3 className="font-serif text-2xl font-medium text-[#1F2937] mb-4">
-                  Shop
+                <h3 className="font-serif text-2xl font-medium text-[#1F2937] mb-3">
+                  Shop Confidently
                 </h3>
-                <p className="text-[#5B6470] leading-relaxed">
-                  Click through to our partner retailers and shop with confidence.
+                <p className="text-sm text-[#5B6470] leading-relaxed">
+                  Click through directly to trusted partner retailers to complete your purchase with zero markup.
                 </p>
               </div>
             </div>
 
-            <div className="mt-16">
+            <div className="mt-12 sm:mt-14">
               <Link
                 href="/how-it-works"
-                className="inline-block text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-[#176B6B] hover:text-[#125858] transition-colors"
               >
-                Learn More About TFE →
+                <span>Learn More About TFE</span>
+                <span>→</span>
               </Link>
             </div>
           </div>

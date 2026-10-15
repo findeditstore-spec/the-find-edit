@@ -3,11 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "desktop:dev": "concurrently \"next dev\" \"cross-env NODE_ENV=development electron electron/main.js\"",
+    "desktop:dev": "concurrently \"next dev --webpack\" \"cross-env NODE_ENV=development electron electron/main.js\"",
     "desktop:build": "next build && electron-builder",
     "desktop:dist": "npm run build && electron-builder --publish=never"
   },
@@ -49,15 +49,6 @@
       "public/",
       "out/",
       "app/favicon.ico"
-    ],
-    "extraFiles": [
-      {
-        "from": ".env.local",
-        "to": ".env.local",
-        "filter": [
-          "**/*"
-        ]
-      }
     ],
     "win": {
       "target": "nsis",

@@ -101,7 +101,7 @@ export default function WishlistContent() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {products.map((product) => (
           <StandardProductCard
             key={product.id}

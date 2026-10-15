@@ -1,28 +1,9 @@
-"use client";
+import { notFound } from "next/navigation";
+import { getSupabaseServerClient } from "../lib/supabase-server";
+import { PageLayout, Container, Section, SectionHeader } from "../components/layout";
+import EnhancedProductSearch from "../components/EnhancedProductSearch";
 
-import { useEffect, useState } from "react";
-import CategoryPage from "../components/CategoryPage";
-import { supabase } from "../lib/supabase";
-
-type Product = {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  image: string;
-  images: string[];
-  price: string;
-  store: string;
-  category: string;
-  subcategory: string;
-};
-
-type Category = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-};
+export const dynamic = "force-dynamic";
 
 type CategoryRouteProps = {
   params: Promise<{
@@ -30,131 +11,55 @@ type CategoryRouteProps = {
   }>;
 };
 
-export default function DynamicCategoryPage({
-  params,
-}: CategoryRouteProps) {
-  const [category, setCategory] = useState<Category | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+export default async function DynamicCategoryPage({ params }: CategoryRouteProps) {
+  const { category: slug } = await params;
+  const supabase = await getSupabaseServerClient();
 
-  useEffect(() => {
-    async function loadCategory() {
-      const { category: slug } = await params;
+  const { data: category, error: categoryError } = await supabase
+    .from("categories")
+    .select("id, name, slug, description")
+    .eq("slug", slug)
+    .eq("status", "active")
+    .maybeSingle();
 
-      const { data: categoryData, error: categoryError } =
-        await supabase
-          .from("categories")
-          .select("id, name, slug, description")
-          .eq("slug", slug)
-          .eq("status", "active")
-          .maybeSingle();
-
-      if (categoryError) {
-        console.error(
-          "Error loading category:",
-          categoryError
-        );
-        setLoading(false);
-        return;
-      }
-
-      if (!categoryData) {
-        setLoading(false);
-        return;
-      }
-
-      setCategory(categoryData);
-
-      const { data: productData, error: productError } =
-        await supabase
-          .from("products")
-          .select(
-  "id, slug, name, description, image, images, price, store, category, subcategory"
-)
-          .eq("category", categoryData.name)
-          .eq("status", "active")
-          .order("created_at", { ascending: false });
-
-      if (productError) {
-        console.error(
-          "Error loading category products:",
-          productError
-        );
-        setLoading(false);
-        return;
-      }
-
-      setProducts(
-        (productData ?? []).map((product) => ({
-          ...product,
-          image: product.image ?? "",
-          images: product.images ?? [],
-          description: product.description ?? "",
-          price: product.price ?? "",
-          store: product.store ?? "",
-          subcategory: product.subcategory ?? "",
-        }))
-      );
-
-      setLoading(false);
-    }
-
-    loadCategory();
-  }, [params]);
-
-  if (loading) {
-    return (
-      <main className="min-h-screen bg-[#FFFDF9] px-6 py-10 text-[#1F2937] md:px-12">
-        <p className="text-sm text-[#6B7280]">
-          Loading category...
-        </p>
-      </main>
-    );
+  if (categoryError || !category) {
+    notFound();
   }
 
-  if (!category) {
-    return (
-      <main className="min-h-screen bg-[#FFFDF9] px-6 py-10 text-[#1F2937] md:px-12">
-        <div className="mx-auto max-w-6xl">
-          <a
-            href="/"
-            className="text-sm font-medium transition hover:text-[#176B6B]"
-          >
-            ← Back to The Find Edit
-          </a>
+  const { data: products } = await supabase
+    .from("products")
+    .select("*")
+    .eq("category", category.name)
+    .eq("status", "active")
+    .order("created_at", { ascending: false });
 
-          <h1 className="mt-8 text-3xl font-semibold">
-            Category not found
-          </h1>
-
-          <p className="mt-2 text-sm text-[#6B7280]">
-            This category does not exist or is not currently
-            active.
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  const subcategories = Array.from(
-    new Set(
-      products
-        .map((product) => product.subcategory)
-        .filter(Boolean)
-    )
-  );
-
-  const filters = ["All", ...subcategories];
+  const categories = [
+    { id: category.id, name: category.name, slug: category.slug }
+  ];
 
   return (
-    <CategoryPage
-      title={category.name}
-      description={
-        category.description ||
-        `Affordable ${category.name.toLowerCase()} finds selected for you.`
-      }
-      filters={filters}
-      products={products}
-    />
+    <PageLayout>
+      <Section background="sand" padding="lg">
+        <Container maxWidth="xl">
+          <SectionHeader
+            label="Curated Category"
+            title={category.name}
+            description={
+              category.description ||
+              `Curated ${category.name.toLowerCase()} finds selected for quality, design, and value.`
+            }
+          />
+        </Container>
+      </Section>
+
+      <Section background="cream" padding="lg">
+        <Container maxWidth="xl">
+          <EnhancedProductSearch
+            products={products ?? []}
+            categories={categories}
+          />
+        </Container>
+      </Section>
+    </PageLayout>
   );
 }

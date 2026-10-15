@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Local build output, logs, and backups
+/dist/
+/dev.log
+/middleware.ts.backup

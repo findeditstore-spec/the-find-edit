@@ -2,6 +2,38 @@ const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
+// Wait for dev server to be ready (development only)
+const waitForDevServer = async (maxAttempts = 30) => {
+  if (!isDev) return;
+
+  const http = require('http');
+  let attempts = 0;
+
+  return new Promise((resolve) => {
+    const check = () => {
+      attempts++;
+      http.get('http://localhost:3000', { timeout: 1000 }, (res) => {
+        if (res.statusCode === 200) {
+          resolve();
+        } else {
+          if (attempts < maxAttempts) {
+            setTimeout(check, 500);
+          } else {
+            resolve(); // Timeout, try loading anyway
+          }
+        }
+      }).on('error', () => {
+        if (attempts < maxAttempts) {
+          setTimeout(check, 500);
+        } else {
+          resolve(); // Timeout, try loading anyway
+        }
+      });
+    };
+    check();
+  });
+};
+
 // Security: Disable node integration and enable context isolation
 const createWindow = () => {
   // Create the browser window with secure defaults
@@ -92,7 +124,10 @@ if (!gotTheLock) {
   });
 
   // This method will be called when Electron has finished initialization
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
+    // Wait for dev server to be ready before creating window
+    await waitForDevServer();
+
     // Create the main window
     const mainWindow = createWindow();
 

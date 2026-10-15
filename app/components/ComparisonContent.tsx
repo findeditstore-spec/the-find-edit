@@ -89,7 +89,7 @@ export default function ComparisonContent() {
               </td>
               {comparedProducts.map(product => (
                 <td key={product.id} className="p-4 border-b border-[#EAE6DF] text-center">
-                  <Link href={`/products/${product.id}`} className="font-medium text-[#1F2937] hover:text-[#176B6B] transition-colors">
+                  <Link href={`/products/${product.slug || product.id}`} className="font-medium text-[#1F2937] hover:text-[#176B6B] transition-colors">
                     {product.name}
                   </Link>
                 </td>
@@ -143,7 +143,7 @@ export default function ComparisonContent() {
                 />
               </div>
               <div className="flex-1">
-                <Link href={`/products/${product.id}`} className="font-serif text-xl font-medium text-[#1F2937] hover:text-[#176B6B] transition-colors block mb-2">
+                <Link href={`/products/${product.slug || product.id}`} className="font-serif text-xl font-medium text-[#1F2937] hover:text-[#176B6B] transition-colors block mb-2">
                   {product.name}
                 </Link>
                 <p className="text-sm text-[#7A827D] mb-2">{product.category}</p>

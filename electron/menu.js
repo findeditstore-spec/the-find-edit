@@ -87,13 +87,11 @@ module.exports = (mainWindow) => {
           accelerator: 'CmdOrCtrl+G',
           click: () => {
             mainWindow.webContents.executeJavaScript(`
-              // Trigger categories menu in the web app
-              const categoriesButton = document.querySelector('button:has-text("Categories"), [data-testid="categories-trigger"]');
-              if (categoriesButton) {
-                categoriesButton.click();
+              const menuButton = document.querySelector('button[aria-label*="menu" i]');
+              if (menuButton) {
+                menuButton.click();
               } else {
-                // Fallback to a category page
-                window.location.href = '/fashion';
+                window.location.href = '/finds';
               }
             `);
           }

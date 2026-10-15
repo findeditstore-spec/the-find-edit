@@ -7,6 +7,7 @@ type ShopButtonProps = {
   productName: string;
   store: string;
   affiliateLink?: string | null;
+  className?: string;
 };
 
 export default function ShopButton({
@@ -14,6 +15,7 @@ export default function ShopButton({
   productName,
   store,
   affiliateLink,
+  className = "",
 }: ShopButtonProps) {
   async function handleClick() {
     await supabase.from("product_clicks").insert({
@@ -27,13 +29,17 @@ export default function ShopButton({
     }
   }
 
+  const defaultClasses =
+    "w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#176B6B] px-8 py-3.5 sm:py-4 text-sm sm:text-base font-medium text-white shadow-sm transition-all hover:bg-[#125858]";
+
   return (
     <button
       type="button"
       onClick={handleClick}
-      className="mt-8 inline-flex w-fit rounded-full bg-[#176B6B] px-7 py-3.5 text-sm font-medium text-white transition hover:opacity-90"
+      className={className || defaultClasses}
     >
-      Shop at {store} ↗
+      <span>Shop at {store}</span>
+      <span className="text-base font-normal">↗</span>
     </button>
   );
 }

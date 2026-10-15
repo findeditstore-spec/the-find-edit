@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 interface Product {
   id: string;
+  slug?: string;
   name: string;
   image: string;
   price: string;
