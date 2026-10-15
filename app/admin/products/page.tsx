@@ -61,7 +61,10 @@ export default function AdminProductsPage() {
       description="Keep product details, merchant links, images and publishing status up to date."
     >
       <div className="space-y-6">
-        <a href="/admin/products/new" className="inline-flex rounded-lg bg-[#176B6B] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#125858]">＋ Add a find</a>
+        <div className="flex flex-wrap gap-3">
+          <a href="/admin/products/new" className="inline-flex rounded-lg bg-[#176B6B] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#125858]">＋ Add a find</a>
+          <a href="/admin/products/bulk" className="inline-flex rounded-lg border border-[#176B6B] px-5 py-3 text-sm font-semibold text-[#176B6B] transition hover:bg-[#F4F0E9]">Add in bulk</a>
+        </div>
 
         <section className="rounded-lg border border-[#EAE6DF] bg-white p-4 sm:p-5">
           <div className="flex flex-col gap-3 md:flex-row">
