@@ -40,6 +40,8 @@ interface ImportDetail {
  * Normalize affiliate URLs for duplicate detection
  * Removes tracking parameters while preserving destination semantics
  * Keeps affiliate IDs as they determine commission routing
+ *
+ * IMPORTANT: Only lowercase the hostname, preserve case in path/query/hash
  */
 function normalizeAffiliateURL(url: string): string {
   if (!url || typeof url !== "string") return "";
@@ -64,12 +66,17 @@ function normalizeAffiliateURL(url: string): string {
     const cleanedParams = new URLSearchParams();
     for (const [key, value] of parsed.searchParams) {
       if (keepParams.has(key.toLowerCase())) {
+        // Preserve case in parameter values (they may be case-sensitive)
         cleanedParams.append(key, value);
       }
     }
 
     parsed.search = cleanedParams.toString();
-    return parsed.toString().toLowerCase();
+
+    // Only lowercase hostname for normalization; preserve case in path/query/hash
+    // URLs are case-sensitive per RFC 3986 for path components
+    const normalized = `${parsed.protocol}//${parsed.hostname?.toLowerCase()}${parsed.pathname}${parsed.search ? "?" + parsed.search : ""}${parsed.hash}`;
+    return normalized;
   } catch {
     // If URL is invalid, return empty to catch it in validation
     return "";
@@ -218,19 +225,86 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    // Validate request size (max 500KB)
+        // Enforce a strict 500 KiB request-body limit while reading the stream.
+    const MAX_BODY_BYTES = 500 * 1024;
     const contentLength = request.headers.get("content-length");
-    if (contentLength && parseInt(contentLength) > 500 * 1024) {
+
+    if (contentLength !== null) {
+      if (!/^\d+$/.test(contentLength)) {
+        return NextResponse.json(
+          { error: "Invalid Content-Length header" },
+          { status: 400 }
+        );
+      }
+
+      if (Number(contentLength) > MAX_BODY_BYTES) {
+        return NextResponse.json(
+          { error: "Request too large (max 500KB)" },
+          { status: 413 }
+        );
+      }
+    }
+
+    const reader = request.body?.getReader();
+
+    if (!reader) {
       return NextResponse.json(
-        { error: "Request too large" },
-        { status: 413 }
+        { error: "Request body is missing" },
+        { status: 400 }
       );
     }
 
-    const body = await request.json();
+    const chunks: Uint8Array[] = [];
+    let totalBytes = 0;
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) break;
+
+        totalBytes += value.byteLength;
+
+        if (totalBytes > MAX_BODY_BYTES) {
+          await reader.cancel().catch(() => {});
+          return NextResponse.json(
+            { error: "Request too large (max 500KB)" },
+            { status: 413 }
+          );
+        }
+
+        chunks.push(value);
+      }
+    } catch {
+      return NextResponse.json(
+        { error: "Could not read request body" },
+        { status: 400 }
+      );
+    }
+
+    // Combine the bounded chunks and decode the JSON.
+    const bodyBytes = new Uint8Array(totalBytes);
+    let offset = 0;
+
+    for (const chunk of chunks) {
+      bodyBytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+
+    let body: unknown;
+
+    try {
+      const bodyText = new TextDecoder("utf-8", { fatal: true }).decode(bodyBytes);
+      body = JSON.parse(bodyText);
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid JSON or UTF-8 in request body" },
+        { status: 400 }
+      );
+    }
 
     // Validate body structure
-    if (!body || typeof body !== "object" || !Array.isArray(body.products)) {
+    if (!body || typeof body !== "object" || !Array.isArray((body as Record<string, unknown>).products)) {
       return NextResponse.json(
         { error: "Invalid request format" },
         { status: 400 }
@@ -329,36 +403,53 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Check for existing products in database (case-insensitive using ILIKE)
-    // Build individual ILIKE conditions for each product name to ensure case-insensitive matching
-    const productNames = validatedProducts.map((p) => p.name.toLowerCase().trim());
-
-    // Query all products and filter in-memory for case-insensitive matching
-    // This avoids PostgreSQL's case-sensitive .in() operator
-    const { data: allProducts, error: checkError } = await supabase
-      .from("products")
-      .select("id, name, affiliate_link");
-
-    if (checkError) {
-      console.error("Error checking existing products:", checkError);
-      return NextResponse.json(
-        { error: "Failed to check for duplicates" },
-        { status: 500 }
-      );
-    }
-
-    // Build set of existing names (normalized) and affiliate URLs for in-memory comparison
+    // Check for existing products in database using safe pagination
+    // Query products in batches to stay within Supabase response limit (1000 rows default)
     const existingNames = new Set<string>();
     const existingAffiliateURLs = new Set<string>();
+    const pageSize = 1000;
+    let pageIndex = 0;
+    let hasMorePages = true;
 
-    for (const existing of allProducts ?? []) {
-      existingNames.add((existing.name as string).toLowerCase().trim());
-
-      if (existing.affiliate_link) {
-        const normalized = normalizeAffiliateURL(existing.affiliate_link as string);
-        if (normalized) {
-          existingAffiliateURLs.add(normalized);
+    while (hasMorePages) {
+      try {
+        const { data: pageProducts, error: checkError } = await supabase
+          .from("products")
+.select("id, name, affiliate_link")
+.order("id", { ascending: true })
+.range(pageIndex * pageSize, (pageIndex + 1) * pageSize - 1);
+        if (checkError) {
+          console.error(`Error checking page ${pageIndex}:`, checkError);
+          return NextResponse.json(
+            { error: "Failed to check for duplicates" },
+            { status: 500 }
+          );
         }
+
+        // If we get fewer results than requested, we've reached the end
+        if (!pageProducts || pageProducts.length < pageSize) {
+          hasMorePages = false;
+        }
+
+        // Process this page's products
+        for (const existing of pageProducts ?? []) {
+          existingNames.add((existing.name as string).toLowerCase().trim());
+
+          if (existing.affiliate_link) {
+            const normalized = normalizeAffiliateURL(existing.affiliate_link as string);
+            if (normalized) {
+              existingAffiliateURLs.add(normalized);
+            }
+          }
+        }
+
+        pageIndex++;
+      } catch (err) {
+        console.error("Pagination error:", err);
+        return NextResponse.json(
+          { error: "Failed to check for duplicates" },
+          { status: 500 }
+        );
       }
     }
 
