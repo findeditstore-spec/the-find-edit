@@ -2,7 +2,7 @@
 
 import AdminLayout from "../_components/AdminLayout";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { getAllProducts, updateProduct, type Product } from "../../lib/products";
+import { getAllProducts, updateProduct, deleteProduct, type Product } from "../../lib/products";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -54,6 +54,25 @@ export default function AdminProductsPage() {
     setBusyId(null);
   }
 
+  async function removeProduct(product: Product) {
+    const confirmed = window.confirm(`Permanently delete “${product.name}”? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    setBusyId(product.id);
+    setMessage("");
+    setError("");
+    const result = await deleteProduct(product.id);
+    if (!result.success) {
+      setError(`Product could not be deleted: ${result.error || "Please try again."}`);
+      setBusyId(null);
+      return;
+    }
+
+    setProducts((current) => current.filter((item) => item.id !== product.id));
+    setMessage(`“${product.name}” was permanently deleted from the catalogue.`);
+    setBusyId(null);
+  }
+
   return (
     <AdminLayout
       currentSection="products"
@@ -88,7 +107,17 @@ export default function AdminProductsPage() {
                 <td className="px-5 py-4 whitespace-nowrap">{product.price || "—"}</td>
                 <td className="px-5 py-4"><span className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${product.status === "active" ? "bg-[#E5F3EC] text-[#23684A]" : product.status === "archived" ? "bg-[#F0F1EF] text-[#687572]" : "bg-[#FFF1D8] text-[#8B5B12]"}`}>{product.status === "active" ? "Live" : product.status === "archived" ? "Archived" : "Draft"}</span></td>
                 <td className="px-5 py-4">{product.featured ? <span className="text-[#176B6B]">Featured</span> : <span className="text-[#A3AAA5]">—</span>}</td>
-                <td className="px-5 py-4 text-right whitespace-nowrap"><a href={`/admin/products/${product.id}/edit`} className="mr-4 font-semibold text-[#176B6B] hover:underline">Edit</a>{product.status !== "archived" && <button type="button" disabled={busyId === product.id} onClick={() => void archiveProduct(product)} className="font-semibold text-[#8B5B12] hover:underline disabled:opacity-50">{busyId === product.id ? "Archiving…" : "Archive"}</button>}</td>
+                <td className="px-5 py-4 text-right whitespace-nowrap">
+                  <a href={`/admin/products/${product.id}/edit`} className="mr-3 font-semibold text-[#176B6B] hover:underline">Edit</a>
+                  {product.status !== "archived" && (
+                    <button type="button" disabled={busyId === product.id} onClick={() => void archiveProduct(product)} className="mr-3 font-semibold text-[#8B5B12] hover:underline disabled:opacity-50">
+                      {busyId === product.id ? "Archiving…" : "Archive"}
+                    </button>
+                  )}
+                  <button type="button" disabled={busyId === product.id} onClick={() => void removeProduct(product)} className="font-semibold text-red-600 hover:underline disabled:opacity-50">
+                    {busyId === product.id ? "Deleting…" : "Delete"}
+                  </button>
+                </td>
               </tr>)}</tbody>
             </table></div>
           )}
