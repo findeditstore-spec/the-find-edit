@@ -47,9 +47,9 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="flex min-h-screen bg-[#FFFDF9]">
-      {/* Left Sidebar */}
-      <aside className="w-64 border-r border-[#EAE6DF] bg-white p-6 flex flex-col">
+    <div className="flex h-[100dvh] w-full overflow-hidden bg-[#FFFDF9]">
+      {/* Left Sidebar - Fixed height and position */}
+      <aside className="fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-[#EAE6DF] bg-white p-6">
         <div className="mb-8">
           <p className="text-xs font-medium uppercase tracking-[0.25em] text-[#176B6B]">
             The Find Edit
@@ -59,7 +59,7 @@ export default function AdminLayout({
           </h1>
         </div>
 
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-2 overflow-y-auto pr-1">
           {navigationItems.map((item) => {
             const isActive = item.key === currentSection;
             return (
@@ -78,7 +78,7 @@ export default function AdminLayout({
           })}
         </nav>
 
-        <div className="space-y-2 border-t border-[#EAE6DF] pt-4">
+        <div className="space-y-2 border-t border-[#EAE6DF] pt-4 mt-4">
           <Link
             href="/"
             className="block rounded-lg px-4 py-2.5 text-sm font-medium text-[#687572] transition hover:bg-[#F4F0E9] hover:text-[#176B6B]"
@@ -97,10 +97,10 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col">
-        {/* Header */}
-        <header className="border-b border-[#EAE6DF] bg-white px-8 py-6">
+      {/* Main Content Container - Offset by sidebar width (ml-64), taking remaining width and full height */}
+      <div className="flex flex-1 flex-col pl-64 h-[100dvh] overflow-hidden">
+        {/* Header - Fixed at top of main content */}
+        <header className="flex-none border-b border-[#EAE6DF] bg-white px-8 py-6 z-20">
           <div className="flex items-center justify-between">
             <div>
               {title && (
@@ -117,13 +117,13 @@ export default function AdminLayout({
           </div>
         </header>
 
-        {/* Content Area */}
-        <div className="flex-1 overflow-auto">
+        {/* Content Area - Independently scrollable */}
+        <main className="flex-1 overflow-y-auto bg-[#FFFDF9]">
           <div className="p-8">
             {children}
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }
